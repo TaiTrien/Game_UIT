@@ -1,0 +1,20 @@
+﻿  Brick.cpp
+  debug.cpp
+  Game.cpp
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\game.cpp(63): warning C4244: 'argument': conversion from 'double' to 'FLOAT', possible loss of data
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\game.cpp(262): warning C4305: '=': truncation from '__int64' to 'float'
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\game.cpp(263): warning C4305: '=': truncation from '__int64' to 'float'
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\game.cpp(273): warning C4305: '=': truncation from '__int64' to 'float'
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\game.cpp(274): warning C4305: '=': truncation from '__int64' to 'float'
+  GameObject.cpp
+  Goomba.cpp
+  main.cpp
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\main.cpp(276): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\main.cpp(293): warning C4018: '<': signed/unsigned mismatch
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\main.cpp(298): warning C4018: '<': signed/unsigned mismatch
+e:\study\nhập môn phát triển game\gamedev-intro-tutorials\04-collision\main.cpp(330): warning C4018: '<': signed/unsigned mismatch
+  Mario.cpp
+  Sprites.cpp
+  Textures.cpp
+  Generating Code...
+  04-Collision.vcxproj -> E:\Study\Nhập môn phát triển game\gamedev-intro-tutorials\Debug\04-Collision.exe
