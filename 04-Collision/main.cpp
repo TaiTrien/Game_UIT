@@ -21,7 +21,7 @@
 #include <windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
-
+#include <fstream>
 #include "debug.h"
 #include "Game.h"
 #include "GameObject.h"
@@ -43,6 +43,7 @@
 #define ID_TEX_MARIO 0
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
+#define ID_TEX_SIMON 30
 
 CGame *game;
 
@@ -124,23 +125,34 @@ void LoadResources()
 
 	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
+	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
+
+
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
-	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
+//	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
+	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_SIMON);
 
+	ifstream infile("Simon.txt");
+	int arr[5];
+	while (infile)
+	{
+		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4];
+		sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMario);
+	}
 	// big
-	sprites->Add(10001, 246, 154, 260, 181, texMario);		// idle right
+	//sprites->Add(10001, 246, 154, 260, 181, texMario);		// idle right
 
-	sprites->Add(10002, 275, 154, 290, 181, texMario);		// walk
-	sprites->Add(10003, 304, 154, 321, 181, texMario);
+	//sprites->Add(10002, 275, 154, 290, 181, texMario);		// walk
+	//sprites->Add(10003, 304, 154, 321, 181, texMario);
 
-	sprites->Add(10011, 186, 154, 200, 181, texMario);		// idle left
-	sprites->Add(10012, 155, 154, 170, 181, texMario);		// walk
-	sprites->Add(10013, 125, 154, 140, 181, texMario);
+	//sprites->Add(10011, 186, 154, 200, 181, texMario);		// idle left
+	//sprites->Add(10012, 155, 154, 170, 181, texMario);		// walk
+	//sprites->Add(10013, 125, 154, 140, 181, texMario);
 
-	sprites->Add(10099, 215, 120, 231, 135, texMario);		// die 
+	//sprites->Add(10099, 215, 120, 231, 135, texMario);		// die 
 
 	// small
 	sprites->Add(10021, 247, 0, 259, 15, texMario);			// idle small right
@@ -169,7 +181,7 @@ void LoadResources()
 	animations->Add(400, ani);
 
 	ani = new CAnimation(100);	// idle big left
-	ani->Add(10011);
+	ani->Add(10004);
 	animations->Add(401, ani);
 
 	ani = new CAnimation(100);	// idle small right
@@ -187,9 +199,9 @@ void LoadResources()
 	animations->Add(500, ani);
 
 	ani = new CAnimation(100);	// // walk left big
-	ani->Add(10011);
-	ani->Add(10012);
-	ani->Add(10013);
+	ani->Add(10004);
+	ani->Add(10005);
+	ani->Add(10006);
 	animations->Add(501, ani);
 
 	ani = new CAnimation(100);	// walk right small
