@@ -1,6 +1,5 @@
 ﻿  main.cpp
-e:\study\castlevania\game_uit\04-collision\main.cpp(288): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-e:\study\castlevania\game_uit\04-collision\main.cpp(305): warning C4018: '<': signed/unsigned mismatch
-e:\study\castlevania\game_uit\04-collision\main.cpp(310): warning C4018: '<': signed/unsigned mismatch
-e:\study\castlevania\game_uit\04-collision\main.cpp(342): warning C4018: '<': signed/unsigned mismatch
+e:\study\castlevania\game_uit\04-collision\main.cpp(322): warning C4018: '<': signed/unsigned mismatch
+e:\study\castlevania\game_uit\04-collision\main.cpp(327): warning C4018: '<': signed/unsigned mismatch
+e:\study\castlevania\game_uit\04-collision\main.cpp(359): warning C4018: '<': signed/unsigned mismatch
   04-Collision.vcxproj -> E:\Study\CastleVania\Game_UIT\04-Collision\Debug\04-Collision.exe

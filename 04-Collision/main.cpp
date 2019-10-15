@@ -48,7 +48,7 @@
 CGame *game;
 
 CMario *mario;
-CGoomba *goomba;
+//CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
 
@@ -75,7 +75,11 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 		mario->SetPosition(50.0f,0.0f);
 		mario->SetSpeed(0, 0);
 		break;
+	case DIK_S:
+		mario->SetState(SIMON_STATE_ATTACK);
+		break;
 	}
+
 }
 
 void CSampleKeyHander::OnKeyUp(int KeyCode)
@@ -87,10 +91,10 @@ void CSampleKeyHander::KeyState(BYTE *states)
 {
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
-	if (game->IsKeyDown(DIK_RIGHT))
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		if (game->IsKeyDown(DIK_RIGHT))
+			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+		else if (game->IsKeyDown(DIK_LEFT))
+			mario->SetState(MARIO_STATE_WALKING_LEFT);
 	else
 		mario->SetState(MARIO_STATE_IDLE);
 }
@@ -216,12 +220,23 @@ void LoadResources()
 	ani->Add(10033);
 	animations->Add(503, ani);
 
+	ani = new CAnimation(100); // fighting right 
+	ani->Add(10007);
+	ani->Add(10008);
+	ani->Add(10009);
+	ani->Add(10001);
+	animations->Add(504, ani);
+
+	ani = new CAnimation(100); // fighting left 
+	ani->Add(10010);
+	ani->Add(10011);
+	ani->Add(10012);
+	ani->Add(10002);
+	animations->Add(505, ani);
 
 	ani = new CAnimation(100);		// Mario die
 	ani->Add(10099);
 	animations->Add(599, ani);
-
-	
 
 	ani = new CAnimation(100);		// brick
 	ani->Add(20001);
@@ -246,6 +261,8 @@ void LoadResources()
 	mario->AddAnimation(501);		// walk left big
 	mario->AddAnimation(502);		// walk right small
 	mario->AddAnimation(503);		// walk left big
+	mario->AddAnimation(504);		// attack right
+	mario->AddAnimation(505);		// attack left
 
 	mario->AddAnimation(599);		// die
 
@@ -280,15 +297,15 @@ void LoadResources()
 	}
 
 	// and Goombas 
-	for (int i = 0; i < 4; i++)
-	{
-		goomba = new CGoomba();
-		goomba->AddAnimation(701);
-		goomba->AddAnimation(702);
-		goomba->SetPosition(200 + i*60, 135);
-		goomba->SetState(GOOMBA_STATE_WALKING);
-		objects.push_back(goomba);
-	}
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	goomba = new CGoomba();
+	//	goomba->AddAnimation(701);
+	//	goomba->AddAnimation(702);
+	//	goomba->SetPosition(200 + i*60, 135);
+	//	goomba->SetState(GOOMBA_STATE_WALKING);
+	//	objects.push_back(goomba);
+	//}
 
 }
 
@@ -430,7 +447,7 @@ int Run()
 			Render();
 		}
 		else
-			Sleep(tickPerFrame - dt);	
+			Sleep(tickPerFrame - dt);
 	}
 
 	return 1;

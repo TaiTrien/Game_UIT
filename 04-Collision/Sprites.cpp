@@ -48,9 +48,12 @@ void CAnimation::Add(int spriteId, DWORD time)
 	LPANIMATION_FRAME frame = new CAnimationFrame(sprite, t);
 	frames.push_back(frame);
 }
-
+int CAnimation::getCurrentFrame() {
+	return this->currentFrame;
+}
 void CAnimation::Render(float x, float y, int alpha)
 {
+
 	DWORD now = GetTickCount();
 	if (currentFrame == -1) 
 	{
@@ -64,10 +67,18 @@ void CAnimation::Render(float x, float y, int alpha)
 		{
 			currentFrame++;
 			lastFrameTime = now;
-			if (currentFrame == frames.size()) currentFrame = 0;
+			if (currentFrame == frames.size()) currentFrame = 0; {
+				isLastFrame = true;
+			}
+			
 		}
+		/*else {
+			isLastFrame = false;
+			t += now - lastFrameTime;
+		}*/
 		
 	}
+
 
 	frames[currentFrame]->GetSprite()->Draw(x, y, alpha);
 }

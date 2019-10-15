@@ -13,6 +13,7 @@
 #define MARIO_STATE_WALKING_LEFT	200
 #define MARIO_STATE_JUMP			300
 #define MARIO_STATE_DIE				400
+#define SIMON_STATE_ATTACK			500
 
 #define MARIO_ANI_BIG_IDLE_RIGHT		0
 #define MARIO_ANI_BIG_IDLE_LEFT			1
@@ -24,7 +25,9 @@
 #define MARIO_ANI_SMALL_WALKING_RIGHT		6
 #define MARIO_ANI_SMALL_WALKING_LEFT		7
 
-#define MARIO_ANI_DIE				8
+#define MARIO_ANI_DIE				11
+#define SIMON_ANI_ATTACK_LEFT		9
+#define SIMON_ANI_ATTACK_RIGHT		8
 
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
@@ -42,6 +45,8 @@ class CMario : public CGameObject
 {
 	int level;
 	int untouchable;
+	bool isAttacking;
+	bool isJumping;
 	DWORD untouchable_start;
 public: 
 	CMario() : CGameObject()

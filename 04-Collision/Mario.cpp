@@ -47,7 +47,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		y += min_ty*dy + ny*0.4f;
 		
 		if (nx!=0) vx = 0;
-		if (ny!=0) vy = 0;
+		if (ny != 0)
+		{
+			vy = 0;
+			isJumping = false;
+		}
+
 
 		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
@@ -94,18 +99,33 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CMario::Render()
 {
 	int ani;
-	if (state == MARIO_STATE_DIE)
-		ani = MARIO_ANI_DIE;
-	else
+	
 	if (level == MARIO_LEVEL_BIG)
 	{
+		
 		if (vx == 0)
 		{
-			if (nx>0) ani = MARIO_ANI_BIG_IDLE_RIGHT;
-			else ani = MARIO_ANI_BIG_IDLE_LEFT;
+			if (nx > 0) {
+				if (isAttacking) {
+					if (nx > 0)
+						ani = SIMON_ANI_ATTACK_RIGHT;
+					else ani = SIMON_ANI_ATTACK_LEFT;
+				}
+				else ani = MARIO_ANI_BIG_IDLE_RIGHT;
+			}
+			else
+			{
+				if (isAttacking) {
+					if (nx > 0)
+						ani = SIMON_ANI_ATTACK_RIGHT;
+					else ani = SIMON_ANI_ATTACK_LEFT;
+				}
+				else
+				ani = MARIO_ANI_BIG_IDLE_LEFT;
+			}
 		}
-		else if (vx > 0) 
-			ani = MARIO_ANI_BIG_WALKING_RIGHT; 
+		else if (vx > 0)
+			ani = MARIO_ANI_BIG_WALKING_RIGHT;
 		else ani = MARIO_ANI_BIG_WALKING_LEFT;
 	}
 	else if (level == MARIO_LEVEL_SMALL)
@@ -123,8 +143,10 @@ void CMario::Render()
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
-
 	RenderBoundingBox();
+	if (animations[ani]->getCurrentFrame() == 3) {
+		isAttacking = false;
+	}
 }
 
 void CMario::SetState(int state)
@@ -134,20 +156,36 @@ void CMario::SetState(int state)
 	switch (state)
 	{
 	case MARIO_STATE_WALKING_RIGHT:
+		if (this->isJumping) {
+			break;
+		}
 		vx = MARIO_WALKING_SPEED;
 		nx = 1;
 		break;
-	case MARIO_STATE_WALKING_LEFT: 
+	case MARIO_STATE_WALKING_LEFT:
+		if (this->isJumping) {
+			break;
+		}
 		vx = -MARIO_WALKING_SPEED;
 		nx = -1;
 		break;
 	case MARIO_STATE_JUMP: 
+		if (isJumping)
+			return;
+		isJumping = true;
 		vy = -MARIO_JUMP_SPEED_Y;
+		break;
 	case MARIO_STATE_IDLE: 
 		vx = 0;
 		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;
+		break;
+	case SIMON_STATE_ATTACK:
+		if (this->isAttacking)
+			break;
+		else
+		this->isAttacking = true;
 		break;
 	}
 }
