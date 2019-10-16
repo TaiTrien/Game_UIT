@@ -221,18 +221,26 @@ void LoadResources()
 	animations->Add(503, ani);
 
 	ani = new CAnimation(100); // fighting right 
-	ani->Add(10007);
-	ani->Add(10008);
-	ani->Add(10009);
-	ani->Add(10001);
-	animations->Add(504, ani);
-
-	ani = new CAnimation(100); // fighting left 
 	ani->Add(10010);
 	ani->Add(10011);
 	ani->Add(10012);
+	ani->Add(10004);
+	animations->Add(504, ani);
+
+	ani = new CAnimation(100); // fighting left 
+	ani->Add(10013);
+	ani->Add(10014);
+	ani->Add(10015);
 	ani->Add(10002);
 	animations->Add(505, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(1030);
+	animations->Add(506, ani); // jumping right
+
+	ani = new CAnimation(100); // jumping left 
+	ani->Add(1031);
+	animations->Add(507, ani);
 
 	ani = new CAnimation(100);		// Mario die
 	ani->Add(10099);
@@ -263,8 +271,9 @@ void LoadResources()
 	mario->AddAnimation(503);		// walk left big
 	mario->AddAnimation(504);		// attack right
 	mario->AddAnimation(505);		// attack left
+	mario->AddAnimation(506);		// jump right
+	mario->AddAnimation(507);		// jump left
 
-	mario->AddAnimation(599);		// die
 
 	mario->SetPosition(50.0f, 0);
 	objects.push_back(mario);

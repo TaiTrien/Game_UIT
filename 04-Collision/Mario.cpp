@@ -102,44 +102,52 @@ void CMario::Render()
 	
 	if (level == MARIO_LEVEL_BIG)
 	{
-		
-		if (vx == 0)
-		{
+		if (isJumping) {
 			if (nx > 0) {
-				if (isAttacking) {
-					if (nx > 0)
-						ani = SIMON_ANI_ATTACK_RIGHT;
-					else ani = SIMON_ANI_ATTACK_LEFT;
-				}
-				else ani = MARIO_ANI_BIG_IDLE_RIGHT;
+				ani = SIMON_ANI_JUMP_RIGHT;
 			}
-			else
+			else {
+				ani = SIMON_ANI_JUMP_LEFT;
+			}
+		}
+		else if (!isJumping) {
+			if (vx == 0)
 			{
-				if (isAttacking) {
-					if (nx > 0)
-						ani = SIMON_ANI_ATTACK_RIGHT;
-					else ani = SIMON_ANI_ATTACK_LEFT;
+				if (nx > 0) {
+					if (isAttacking) {
+						if (nx > 0)
+							ani = SIMON_ANI_ATTACK_RIGHT;
+						else ani = SIMON_ANI_ATTACK_LEFT;
+					}
+					else ani = MARIO_ANI_BIG_IDLE_RIGHT;
 				}
 				else
-				ani = MARIO_ANI_BIG_IDLE_LEFT;
+				{
+					if (isAttacking) {
+						if (nx > 0)
+							ani = SIMON_ANI_ATTACK_RIGHT;
+						else ani = SIMON_ANI_ATTACK_LEFT;
+					}
+					else
+						ani = MARIO_ANI_BIG_IDLE_LEFT;
+				}
 			}
+			else if (vx > 0)
+				ani = MARIO_ANI_BIG_WALKING_RIGHT;
+			else ani = MARIO_ANI_BIG_WALKING_LEFT;
 		}
-		else if (vx > 0)
-			ani = MARIO_ANI_BIG_WALKING_RIGHT;
-		else ani = MARIO_ANI_BIG_WALKING_LEFT;
-	}
-	else if (level == MARIO_LEVEL_SMALL)
-	{
-		if (vx == 0)
+		else if (level == MARIO_LEVEL_SMALL)
 		{
-			if (nx>0) ani = MARIO_ANI_SMALL_IDLE_RIGHT;
-			else ani = MARIO_ANI_SMALL_IDLE_LEFT;
+			if (vx == 0)
+			{
+				if (nx > 0) ani = MARIO_ANI_SMALL_IDLE_RIGHT;
+				else ani = MARIO_ANI_SMALL_IDLE_LEFT;
+			}
+			else if (vx > 0)
+				ani = MARIO_ANI_SMALL_WALKING_RIGHT;
+			else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 		}
-		else if (vx > 0)
-			ani = MARIO_ANI_SMALL_WALKING_RIGHT;
-		else ani = MARIO_ANI_SMALL_WALKING_LEFT;
 	}
-
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
