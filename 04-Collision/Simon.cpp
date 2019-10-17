@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include "debug.h"
 
 #include "Simon.h"
@@ -29,7 +29,9 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable_start = 0;
 		untouchable = 0;
 	}
-
+	//if (isSitting) {
+	//	y += 0.2; //Update tọa độ cho sprite ngồi
+	//}
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
 	{
@@ -99,15 +101,23 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CSimon::Render()
 {
 	int ani;
-	
-	if (level == SIMON_LEVEL_BIG)
-	{
+	int maxFrame = 0;
+	int temp = 1;
 		if (isJumping) {
+			maxFrame = 1;
 			if (nx > 0) {
-				ani = SIMON_ANI_JUMP_RIGHT;
+				if (isAttacking) {
+					maxFrame = 3;
+						ani = SIMON_ANI_ATTACK_RIGHT;
+				}
+				else ani = SIMON_ANI_JUMP_RIGHT;
 			}
 			else {
-				ani = SIMON_ANI_JUMP_LEFT;
+				if (isAttacking) {
+					maxFrame = 3;
+					ani = SIMON_ANI_ATTACK_LEFT;
+				}
+				else ani = SIMON_ANI_JUMP_LEFT;
 			}
 		}
 		else if (!isJumping) {
@@ -115,18 +125,32 @@ void CSimon::Render()
 			{
 				if (nx > 0) {
 					if (isAttacking) {
-						if (nx > 0)
+						maxFrame = 3;
+						if (isSitting)
+						{
+							ani = SIMON_ANI_SIT_ATTACK_RIGHT;
+						}
+						else 
 							ani = SIMON_ANI_ATTACK_RIGHT;
-						else ani = SIMON_ANI_ATTACK_LEFT;
+					}
+					else if(isSitting) {
+						ani = SIMON_ANI_JUMP_RIGHT; // VÌ SPRITE JUMP GIỐNG SPRITE NGỒI
 					}
 					else ani = SIMON_ANI_BIG_IDLE_RIGHT;
 				}
 				else
 				{
 					if (isAttacking) {
-						if (nx > 0)
-							ani = SIMON_ANI_ATTACK_RIGHT;
-						else ani = SIMON_ANI_ATTACK_LEFT;
+						maxFrame = 3;
+						if (isSitting) {
+							ani = SIMON_ANI_SIT_ATTACK_LEFT;
+						}
+						else
+							ani = SIMON_ANI_ATTACK_LEFT;
+						//else ani = SIMON_ANI_ATTACK_LEFT;
+					}
+					else if (isSitting) {
+						ani = SIMON_ANI_JUMP_LEFT; // VÌ SPRITE JUMP GIỐNG SPRITE NGỒI
 					}
 					else
 						ani = SIMON_ANI_BIG_IDLE_LEFT;
@@ -136,24 +160,20 @@ void CSimon::Render()
 				ani = SIMON_ANI_BIG_WALKING_RIGHT;
 			else ani = SIMON_ANI_BIG_WALKING_LEFT;
 		}
-		else if (level == SIMON_LEVEL_SMALL)
-		{
-			if (vx == 0)
-			{
-				if (nx > 0) ani = SIMON_ANI_SMALL_IDLE_RIGHT;
-				else ani = SIMON_ANI_SMALL_IDLE_LEFT;
-			}
-			else if (vx > 0)
-				ani = SIMON_ANI_SMALL_WALKING_RIGHT;
-			else ani = SIMON_ANI_SMALL_WALKING_LEFT;
-		}
-	}
+		
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
 	RenderBoundingBox();
-	if (animations[ani]->getCurrentFrame() == 3) {
-		isAttacking = false;
+	if (animations[ani]->getCurrentFrame() == maxFrame) {
+		if (isAttacking)
+			isAttacking = false;
+		if (isSitting) {
+			isSitting = false;
+		}
+		if (isJumping)
+			isJumping = false;
+		temp = 1;
 	}
 }
 
@@ -167,6 +187,9 @@ void CSimon::SetState(int state)
 		if (this->isJumping) {
 			break;
 		}
+		if (this->isSitting) {
+			break;
+		}
 		vx = SIMON_WALKING_SPEED;
 		nx = 1;
 		break;
@@ -174,12 +197,15 @@ void CSimon::SetState(int state)
 		if (this->isJumping) {
 			break;
 		}
+		if (this->isSitting) {
+			break;
+		}
 		vx = -SIMON_WALKING_SPEED;
 		nx = -1;
 		break;
 	case SIMON_STATE_JUMP:
 		if (isJumping)
-			return;
+			break;
 		isJumping = true;
 		vy = -SIMON_JUMP_SPEED_Y;
 		break;
@@ -192,8 +218,13 @@ void CSimon::SetState(int state)
 	case SIMON_STATE_ATTACK:
 		if (this->isAttacking)
 			break;
-		else
 		this->isAttacking = true;
+		break;
+	case SIMON_STATE_SITTING:
+		if (this->isSitting)
+			break;
+		vx = 0;
+		this->isSitting = true;
 		break;
 	}
 }
@@ -203,15 +234,7 @@ void CSimon::GetBoundingBox(float &left, float &top, float &right, float &bottom
 	left = x;
 	top = y; 
 
-	if (level== SIMON_LEVEL_BIG)
-	{
-		right = x + SIMON_BIG_BBOX_WIDTH;
-		bottom = y + SIMON_BIG_BBOX_HEIGHT;
-	}
-	else
-	{
-		right = x + SIMON_SMALL_BBOX_WIDTH;
-		bottom = y + SIMON_SMALL_BBOX_HEIGHT;
-	}
+	right = x + SIMON_BIG_BBOX_WIDTH;
+	bottom = y + SIMON_BIG_BBOX_HEIGHT;	
 }
 

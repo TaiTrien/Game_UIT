@@ -69,13 +69,7 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	case DIK_SPACE:
 		simon->SetState(SIMON_STATE_JUMP);
 		break;
-	case DIK_A: // reset
-		simon->SetState(SIMON_STATE_IDLE);
-		simon->SetLevel(SIMON_LEVEL_BIG);
-		simon->SetPosition(50.0f,0.0f);
-		simon->SetSpeed(0, 0);
-		break;
-	case DIK_S:
+	case DIK_A:
 		simon->SetState(SIMON_STATE_ATTACK);
 		break;
 	}
@@ -91,10 +85,12 @@ void CSampleKeyHander::KeyState(BYTE *states)
 {
 	// disable control key when Mario die 
 	if (simon->GetState() == SIMON_STATE_DIE) return;
-		if (game->IsKeyDown(DIK_RIGHT))
-			simon->SetState(SIMON_STATE_WALKING_RIGHT);
-		else if (game->IsKeyDown(DIK_LEFT))
-			simon->SetState(SIMON_STATE_WALKING_LEFT);
+	if (game->IsKeyDown(DIK_RIGHT))
+		simon->SetState(SIMON_STATE_WALKING_RIGHT);
+	else if (game->IsKeyDown(DIK_LEFT))
+		simon->SetState(SIMON_STATE_WALKING_LEFT);
+	else if (game->IsKeyDown(DIK_DOWN))
+		simon->SetState(SIMON_STATE_SITTING);
 	else
 		simon->SetState(SIMON_STATE_IDLE);
 }
@@ -224,14 +220,14 @@ void LoadResources()
 	ani->Add(10010);
 	ani->Add(10011);
 	ani->Add(10012);
-	ani->Add(10004);
+	ani->Add(10001);
 	animations->Add(504, ani);
 
 	ani = new CAnimation(100); // fighting left 
 	ani->Add(10013);
 	ani->Add(10014);
 	ani->Add(10015);
-	ani->Add(10002);
+	ani->Add(10004);
 	animations->Add(505, ani);
 
 	ani = new CAnimation(100);
@@ -241,6 +237,20 @@ void LoadResources()
 	ani = new CAnimation(100); // jumping left 
 	ani->Add(1031);
 	animations->Add(507, ani);
+
+	ani = new CAnimation(100); // sit attack right 
+	ani->Add(1030);
+	ani->Add(1041);
+	ani->Add(1042);
+	ani->Add(1043);
+	animations->Add(508, ani);
+
+	ani = new CAnimation(100); // sit attack left 
+	ani->Add(1031);
+	ani->Add(1044);
+	ani->Add(1045);
+	ani->Add(1046);
+	animations->Add(509, ani);
 
 	ani = new CAnimation(100);		// Mario die
 	ani->Add(10099);
@@ -273,7 +283,8 @@ void LoadResources()
 	simon->AddAnimation(505);		// attack left
 	simon->AddAnimation(506);		// jump right
 	simon->AddAnimation(507);		// jump left
-
+	simon->AddAnimation(508);		// sit attack right
+	simon->AddAnimation(509);		// sit attack left
 
 	simon->SetPosition(50.0f, 0);
 	objects.push_back(simon);
