@@ -79,18 +79,25 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 void CSampleKeyHander::OnKeyUp(int KeyCode)
 {
 	DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
+	switch (KeyCode)
+	{
+	case DIK_DOWN:
+		simon->SetState(SIMON_STATE_STAND_UP);
+		break;
+	
+	}
 }
 
 void CSampleKeyHander::KeyState(BYTE *states)
 {
 	// disable control key when Mario die 
 	if (simon->GetState() == SIMON_STATE_DIE) return;
-	if (game->IsKeyDown(DIK_RIGHT))
+	if (game->IsKeyDown(DIK_DOWN))
+		simon->SetState(SIMON_STATE_SITTING);
+	else if (game->IsKeyDown(DIK_RIGHT))
 		simon->SetState(SIMON_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
 		simon->SetState(SIMON_STATE_WALKING_LEFT);
-	else if (game->IsKeyDown(DIK_DOWN))
-		simon->SetState(SIMON_STATE_SITTING);
 	else
 		simon->SetState(SIMON_STATE_IDLE);
 }

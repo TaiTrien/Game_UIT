@@ -101,20 +101,15 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 void CSimon::Render()
 {
 	int ani;
-	int maxFrame = 0;
-	int temp = 1;
 		if (isJumping) {
-			maxFrame = 1;
 			if (nx > 0) {
 				if (isAttacking) {
-					maxFrame = 3;
 						ani = SIMON_ANI_ATTACK_RIGHT;
 				}
 				else ani = SIMON_ANI_JUMP_RIGHT;
 			}
 			else {
 				if (isAttacking) {
-					maxFrame = 3;
 					ani = SIMON_ANI_ATTACK_LEFT;
 				}
 				else ani = SIMON_ANI_JUMP_LEFT;
@@ -125,7 +120,6 @@ void CSimon::Render()
 			{
 				if (nx > 0) {
 					if (isAttacking) {
-						maxFrame = 3;
 						if (isSitting)
 						{
 							ani = SIMON_ANI_SIT_ATTACK_RIGHT;
@@ -141,7 +135,6 @@ void CSimon::Render()
 				else
 				{
 					if (isAttacking) {
-						maxFrame = 3;
 						if (isSitting) {
 							ani = SIMON_ANI_SIT_ATTACK_LEFT;
 						}
@@ -165,15 +158,8 @@ void CSimon::Render()
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
 	RenderBoundingBox();
-	if (animations[ani]->getCurrentFrame() == maxFrame) {
-		if (isAttacking)
+	if (isAttacking && animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME) {
 			isAttacking = false;
-		if (isSitting) {
-			isSitting = false;
-		}
-		if (isJumping)
-			isJumping = false;
-		temp = 1;
 	}
 }
 
@@ -184,23 +170,25 @@ void CSimon::SetState(int state)
 	switch (state)
 	{
 	case SIMON_STATE_WALKING_RIGHT:
-		if (this->isJumping) {
-			break;
+		if (this->isJumping || this->isSitting) {
+			vx = 0;
 		}
-		if (this->isSitting) {
-			break;
+		else if (this->isAttacking) {
+			vx = 0;
 		}
-		vx = SIMON_WALKING_SPEED;
+		else
+			vx = SIMON_WALKING_SPEED;
 		nx = 1;
 		break;
 	case SIMON_STATE_WALKING_LEFT:
-		if (this->isJumping) {
-			break;
+		if (this->isJumping || this->isSitting) {
+			vx = 0;
 		}
-		if (this->isSitting) {
-			break;
+		else if (this->isAttacking) {
+			vx = 0;
 		}
-		vx = -SIMON_WALKING_SPEED;
+		else
+			vx = -SIMON_WALKING_SPEED;
 		nx = -1;
 		break;
 	case SIMON_STATE_JUMP:
@@ -211,6 +199,7 @@ void CSimon::SetState(int state)
 		break;
 	case SIMON_STATE_IDLE:
 		vx = 0;
+		isSitting = false;
 		break;
 	case SIMON_STATE_DIE:
 		vy = -SIMON_DIE_DEFLECT_SPEED;
@@ -224,17 +213,27 @@ void CSimon::SetState(int state)
 		if (this->isSitting)
 			break;
 		vx = 0;
+		y += 5;
 		this->isSitting = true;
 		break;
+	case SIMON_STATE_STAND_UP:
+		y -= 5;
+		isSitting = false;
+		break;
 	}
+	
 }
 
 void CSimon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
 	left = x;
 	top = y; 
-
+	
 	right = x + SIMON_BIG_BBOX_WIDTH;
 	bottom = y + SIMON_BIG_BBOX_HEIGHT;	
+	if (isSitting) {
+		bottom -= 5;
+	}
+	
 }
 
