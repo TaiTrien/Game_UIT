@@ -26,17 +26,18 @@
 #include "Game.h"
 #include "GameObject.h"
 #include "Textures.h"
-
+#include "PlayScene.h"
 #include "Simon.h"
 #include "Whip.h"
+#include "FireHolding.h"
 #include "Brick.h"
 #include "Goomba.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"04 - Collision"
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
-#define SCREEN_WIDTH 320
+#define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
+#define SCREEN_WIDTH 300
 #define SCREEN_HEIGHT 240
 
 #define MAX_FRAME_RATE 120
@@ -46,11 +47,14 @@
 #define ID_TEX_MISC 20
 #define ID_TEX_SIMON 30
 #define ID_TEX_WHIP 40
-
+#define ID_TEX_MAP 50
+#define ID_TEX_FIRE 60
 
 CGame *game;
 Whip *whip;
 Simon *simon;
+PlayScene *playScene;
+FireHolding *fire;
 //CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
@@ -138,14 +142,18 @@ void LoadResources()
 
 	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
 	textures->Add(ID_TEX_WHIP, L"textures\\whip.png", D3DCOLOR_XRGB(0, 128, 128));
-
+	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(255, 255, 255));
+	textures->Add(ID_TEX_FIRE, L"textures\\Fireholding.png", D3DCOLOR_XRGB(34, 177, 76));
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
+	
 //	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
 	LPDIRECT3DTEXTURE9 texSimon = textures->Get(ID_TEX_SIMON);
 	LPDIRECT3DTEXTURE9 texWhip = textures->Get(ID_TEX_WHIP);
+	LPDIRECT3DTEXTURE9 texMap = textures->Get(ID_TEX_MAP);
+	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
 
 	ifstream infile("text\\Sprites.txt");
 	int arr[6];
@@ -156,7 +164,13 @@ void LoadResources()
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texSimon);
 		else if (arr[5] == 1)
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texWhip);
+		else if (arr[5] == 2)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMap);
+		else if (arr[5] == 3)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texFire);
+
 	}
+	
 	
 
 
@@ -282,6 +296,36 @@ void LoadResources()
 	ani->Add(30003);
 	animations->Add(702, ani);
 
+	for (int i = 0; i <= 23; i++) {  // for map
+		ani = new CAnimation(100);
+		ani->Add(i);
+		animations->Add(i, ani);
+	}
+	ani = new CAnimation(100);
+	for (int i = 0; i <= 1; i++) {  // for fire holding
+		ani->Add(i + 100);
+		animations->Add(700, ani);
+	}
+
+
+	ifstream infile2("text\\Entrance.txt");
+	int mArray;
+	for (int d = 0; d < 5; d++) {
+		for (int c = 0; c < 24; c++) {
+			infile2 >> mArray;
+			PlayScene *entrance = new PlayScene();
+			if (mArray!= 0)
+			{
+				entrance->AddAnimation(mArray);
+				entrance->SetPosition(0 + c * 32.0f,  d * 32.0f);
+				objects.push_back(entrance);
+			}
+		}
+	}
+	infile2.close();
+
+	
+
 	simon = new Simon();
 	simon->AddAnimation(400);		// idle right big
 	simon->AddAnimation(401);		// idle left big
@@ -302,35 +346,26 @@ void LoadResources()
 	objects.push_back(simon);
 
 	whip = new Whip();
+	whip->CloneSimon(simon);
 	whip->AddAnimation(800);
 	whip->AddAnimation(801);
 	whip->AddAnimation(602);
 	objects.push_back(whip);
 
-	for (int i = 0; i < 5; i++)
-	{
-		CBrick *brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(100.0f + i*60.0f, 74.0f);
-		objects.push_back(brick);
-
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(100.0f + i*60.0f, 90.0f);
-		objects.push_back(brick);
-
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(84.0f + i*60.0f, 90.0f);
-		objects.push_back(brick);
+	for (int i = 1; i <= 2; i++) {
+		fire = new FireHolding();
+		fire->AddAnimation(700);
+		fire->SetPosition(200*i + 16.0f, 130);
+		objects.push_back(fire);
 	}
+	
 
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 60; i++)
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(0 + i*16.0f, 150);
+		brick->SetPosition(0 + i*16.0f, 160);
 		objects.push_back(brick);
 	}
 
@@ -355,7 +390,7 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-	whip->Get_simon(simon);
+	//whip->CloneSimon(simon);
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{

@@ -170,6 +170,7 @@ void Simon::SetState(int state)
 	case SIMON_STATE_WALKING_RIGHT:
 		if (this->isJumping || this->isSitting) {
 			vx = 0;
+			
 		}
 		else if (this->isAttacking) {
 			vx = 0;
@@ -233,5 +234,9 @@ void Simon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 		bottom -= 5;
 	}
 	
+}
+bool Simon::isAttack() {
+	if (isAttacking) return true;
+	return false;
 }
 

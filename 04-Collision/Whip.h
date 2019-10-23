@@ -1,5 +1,4 @@
 #pragma once
-#include<iostream>
 #include "GameObject.h"
 #include"Simon.h"
 #define  WHIP_STATE_ATTACK 100
@@ -11,14 +10,14 @@
 class Whip :public CGameObject
 {
 	DWORD timer = 0;
-	Simon *Simon_clone;
-	bool WhipAttack;
+	Simon *simon;
+	bool isWhipAttack;
 public:
 
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
 	void SetState(int stat);
-	void Get_simon(Simon *simon) {Simon_clone = simon; }
+	void CloneSimon(Simon *SIMON) { simon = SIMON; }
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 };
 
