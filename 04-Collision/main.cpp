@@ -28,6 +28,7 @@
 #include "Textures.h"
 
 #include "Simon.h"
+#include "Whip.h"
 #include "Brick.h"
 #include "Goomba.h"
 
@@ -44,10 +45,12 @@
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 #define ID_TEX_SIMON 30
+#define ID_TEX_WHIP 40
+
 
 CGame *game;
-
-CSimon *simon;
+Whip *whip;
+Simon *simon;
 //CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
@@ -71,6 +74,7 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 		break;
 	case DIK_A:
 		simon->SetState(SIMON_STATE_ATTACK);
+		whip->SetState(WHIP_STATE_ATTACK);
 		break;
 	}
 
@@ -133,43 +137,27 @@ void LoadResources()
 	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
 	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
-
+	textures->Add(ID_TEX_WHIP, L"textures\\whip.png", D3DCOLOR_XRGB(0, 128, 128));
 
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
 //	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
-	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_SIMON);
+	LPDIRECT3DTEXTURE9 texSimon = textures->Get(ID_TEX_SIMON);
+	LPDIRECT3DTEXTURE9 texWhip = textures->Get(ID_TEX_WHIP);
 
-	ifstream infile("Simon.txt");
-	int arr[5];
+	ifstream infile("text\\Sprites.txt");
+	int arr[6];
 	while (infile)
 	{
-		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4];
-		sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMario);
+		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4] >> arr[5];
+		if (arr[5] == 0)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texSimon);
+		else if (arr[5] == 1)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texWhip);
 	}
-	// big
-	//sprites->Add(10001, 246, 154, 260, 181, texMario);		// idle right
-
-	//sprites->Add(10002, 275, 154, 290, 181, texMario);		// walk
-	//sprites->Add(10003, 304, 154, 321, 181, texMario);
-
-	//sprites->Add(10011, 186, 154, 200, 181, texMario);		// idle left
-	//sprites->Add(10012, 155, 154, 170, 181, texMario);		// walk
-	//sprites->Add(10013, 125, 154, 140, 181, texMario);
-
-	//sprites->Add(10099, 215, 120, 231, 135, texMario);		// die 
-
-	// small
-	sprites->Add(10021, 247, 0, 259, 15, texMario);			// idle small right
-	sprites->Add(10022, 275, 0, 291, 15, texMario);			// walk 
-	sprites->Add(10023, 306, 0, 320, 15, texMario);			// 
-
-	sprites->Add(10031, 187, 0, 198, 15, texMario);			// idle small left
-
-	sprites->Add(10032, 155, 0, 170, 15, texMario);			// walk
-	sprites->Add(10033, 125, 0, 139, 15, texMario);			// 
+	
 
 
 	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
@@ -223,14 +211,14 @@ void LoadResources()
 	ani->Add(10033);
 	animations->Add(503, ani);
 
-	ani = new CAnimation(100); // fighting right 
+	ani = new CAnimation(100); // attack right 
 	ani->Add(10010);
 	ani->Add(10011);
 	ani->Add(10012);
 	ani->Add(10001);
 	animations->Add(504, ani);
 
-	ani = new CAnimation(100); // fighting left 
+	ani = new CAnimation(100); // attack left 
 	ani->Add(10013);
 	ani->Add(10014);
 	ani->Add(10015);
@@ -246,18 +234,36 @@ void LoadResources()
 	animations->Add(507, ani);
 
 	ani = new CAnimation(100); // sit attack right 
-	ani->Add(1030);
 	ani->Add(1041);
 	ani->Add(1042);
 	ani->Add(1043);
+	ani->Add(1030);
 	animations->Add(508, ani);
 
 	ani = new CAnimation(100); // sit attack left 
-	ani->Add(1031);
 	ani->Add(1044);
 	ani->Add(1045);
 	ani->Add(1046);
+	ani->Add(1031);
 	animations->Add(509, ani);
+
+	ani = new CAnimation(100); // whip type 1 attack right 
+	ani->Add(2001);
+	ani->Add(2002);
+	ani->Add(2003);
+	ani->Add(2060); // empty sprite
+	animations->Add(800, ani);
+
+	ani = new CAnimation(100); // whip type 1 attack left 
+	ani->Add(2004);
+	ani->Add(2005);
+	ani->Add(2006);
+	ani->Add(2060);
+	animations->Add(801, ani);
+
+	ani = new CAnimation(100);
+	ani->Add(2060);
+	animations->Add(602, ani);
 
 	ani = new CAnimation(100);		// Mario die
 	ani->Add(10099);
@@ -276,7 +282,7 @@ void LoadResources()
 	ani->Add(30003);
 	animations->Add(702, ani);
 
-	simon = new CSimon();
+	simon = new Simon();
 	simon->AddAnimation(400);		// idle right big
 	simon->AddAnimation(401);		// idle left big
 	simon->AddAnimation(402);		// idle right small
@@ -292,9 +298,14 @@ void LoadResources()
 	simon->AddAnimation(507);		// jump left
 	simon->AddAnimation(508);		// sit attack right
 	simon->AddAnimation(509);		// sit attack left
-
 	simon->SetPosition(50.0f, 0);
 	objects.push_back(simon);
+
+	whip = new Whip();
+	whip->AddAnimation(800);
+	whip->AddAnimation(801);
+	whip->AddAnimation(602);
+	objects.push_back(whip);
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -344,7 +355,7 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-
+	whip->Get_simon(simon);
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{

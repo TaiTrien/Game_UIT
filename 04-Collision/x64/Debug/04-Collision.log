@@ -1,0 +1,22 @@
+﻿  Brick.cpp
+e:\study\castlevania\game_uit\04-collision\gameobject.h(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  debug.cpp
+e:\study\castlevania\game_uit\04-collision\debug.cpp(11): error C2664: 'void OutputDebugStringA(LPCSTR)': cannot convert argument 1 from 'wchar_t [4096]' to 'LPCSTR'
+  e:\study\castlevania\game_uit\04-collision\debug.cpp(11): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+  Game.cpp
+e:\study\castlevania\game_uit\04-collision\game.h(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  GameObject.cpp
+e:\study\castlevania\game_uit\04-collision\gameobject.cpp(1): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Goomba.cpp
+e:\study\castlevania\game_uit\04-collision\gameobject.h(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  main.cpp
+e:\study\castlevania\game_uit\04-collision\main.cpp(23): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Simon.cpp
+e:\study\castlevania\game_uit\04-collision\gameobject.h(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Sprites.cpp
+e:\study\castlevania\game_uit\04-collision\sprites.h(3): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Textures.cpp
+e:\study\castlevania\game_uit\04-collision\textures.cpp(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Whip.cpp
+e:\study\castlevania\game_uit\04-collision\gameobject.h(4): fatal error C1083: Cannot open include file: 'd3dx9.h': No such file or directory
+  Generating Code...

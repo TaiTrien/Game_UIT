@@ -1,18 +1,17 @@
 ﻿#include <algorithm>
 #include "debug.h"
-
 #include "Simon.h"
 #include "Game.h"
 
 #include "Goomba.h"
 
-void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
+void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
 
 	// Simple fall down
-	vy += SIMON_GRAVITY*dt;
+	vy += SIMON_GRAVITY*dt;	
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -29,9 +28,7 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable_start = 0;
 		untouchable = 0;
 	}
-	//if (isSitting) {
-	//	y += 0.2; //Update tọa độ cho sprite ngồi
-	//}
+	
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
 	{
@@ -80,12 +77,12 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						if (goomba->GetState()!=GOOMBA_STATE_DIE)
 						{
-							if (level > SIMON_LEVEL_SMALL)
+							/*if (level > SIMON_LEVEL_SMALL)
 							{
 								level = SIMON_LEVEL_SMALL;
 								StartUntouchable();
 							}
-							else 
+							else */
 								SetState(SIMON_STATE_DIE);
 						}
 					}
@@ -98,7 +95,7 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
-void CSimon::Render()
+void Simon::Render()
 {
 	int ani;
 		if (isJumping) {
@@ -158,12 +155,13 @@ void CSimon::Render()
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
 	RenderBoundingBox();
-	if (isAttacking && animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME) {
+	if (isAttacking) {
+		if(animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME)
 			isAttacking = false;
 	}
 }
 
-void CSimon::SetState(int state)
+void Simon::SetState(int state)
 {
 	CGameObject::SetState(state);
 
@@ -224,7 +222,7 @@ void CSimon::SetState(int state)
 	
 }
 
-void CSimon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
+void Simon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
 	left = x;
 	top = y; 
