@@ -77,13 +77,7 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						if (goomba->GetState()!=GOOMBA_STATE_DIE)
 						{
-							/*if (level > SIMON_LEVEL_SMALL)
-							{
-								level = SIMON_LEVEL_SMALL;
-								StartUntouchable();
-							}
-							else */
-								SetState(SIMON_STATE_DIE);
+							SetState(SIMON_STATE_DIE);
 						}
 					}
 				}
@@ -164,7 +158,7 @@ void Simon::Render()
 void Simon::SetState(int state)
 {
 	CGameObject::SetState(state);
-
+	
 	switch (state)
 	{
 	case SIMON_STATE_WALKING_RIGHT:
@@ -205,8 +199,9 @@ void Simon::SetState(int state)
 		break;
 	case SIMON_STATE_ATTACK:
 		if (this->isAttacking)
-			break;
+			return;
 		this->isAttacking = true;
+		vx = 0;
 		break;
 	case SIMON_STATE_SITTING:
 		if (this->isSitting)
@@ -235,8 +230,13 @@ void Simon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 	}
 	
 }
-bool Simon::isAttack() {
-	if (isAttacking) return true;
-	return false;
+bool Simon::getIsAttacking() {
+	return isAttacking;
+}
+bool Simon::getIsJumping() {
+	return isJumping;
+}
+bool Simon::getIsSitting() {
+	return isSitting;
 }
 

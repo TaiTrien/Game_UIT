@@ -5,6 +5,7 @@
 
 void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 {
+	
 	if (simon->nx > 0)
 	{
 		if (animations[WHIP_ANI_ATTACK_RIGHT]->getCurrentFrame() == 0)
@@ -70,6 +71,7 @@ void Whip::Render()
 }
 void Whip::SetState(int stat)
 {
+	if (this->isWhipAttack) return;
 	CGameObject::SetState(stat);
 	switch (state = WHIP_STATE_ATTACK)
 	{

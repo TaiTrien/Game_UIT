@@ -38,7 +38,7 @@
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
 #define SCREEN_WIDTH 300
-#define SCREEN_HEIGHT 240
+#define SCREEN_HEIGHT 220
 
 #define MAX_FRAME_RATE 120
 
@@ -49,6 +49,7 @@
 #define ID_TEX_WHIP 40
 #define ID_TEX_MAP 50
 #define ID_TEX_FIRE 60
+#define ID_TEX_MAP_ITEMS 70
 
 CGame *game;
 Whip *whip;
@@ -74,11 +75,22 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
+		if (simon->getIsSitting()) return;
 		simon->SetState(SIMON_STATE_JUMP);
 		break;
 	case DIK_A:
 		simon->SetState(SIMON_STATE_ATTACK);
 		whip->SetState(WHIP_STATE_ATTACK);
+		break;
+	case DIK_LEFT:
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->nx = -1;
+		break;
+	case DIK_RIGHT:
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->nx = 1;
 		break;
 	}
 
@@ -92,7 +104,6 @@ void CSampleKeyHander::OnKeyUp(int KeyCode)
 	case DIK_DOWN:
 		simon->SetState(SIMON_STATE_STAND_UP);
 		break;
-	
 	}
 }
 
@@ -102,10 +113,16 @@ void CSampleKeyHander::KeyState(BYTE *states)
 	if (simon->GetState() == SIMON_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_DOWN))
 		simon->SetState(SIMON_STATE_SITTING);
-	else if (game->IsKeyDown(DIK_RIGHT))
+	else if (game->IsKeyDown(DIK_RIGHT)) {
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
 		simon->SetState(SIMON_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
+	}
+	else if (game->IsKeyDown(DIK_LEFT)) {
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
 		simon->SetState(SIMON_STATE_WALKING_LEFT);
+	}
 	else
 		simon->SetState(SIMON_STATE_IDLE);
 }
@@ -134,26 +151,22 @@ void LoadResources()
 	CTextures * textures = CTextures::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, L"textures\\simon.png",D3DCOLOR_XRGB(255, 255, 255));
-	textures->Add(ID_TEX_MISC, L"textures\\misc.png", D3DCOLOR_XRGB(176, 224, 248));
-	textures->Add(ID_TEX_ENEMY, L"textures\\enemies.png", D3DCOLOR_XRGB(3, 26, 110));
-
-
 	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
-
 	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
 	textures->Add(ID_TEX_WHIP, L"textures\\whip.png", D3DCOLOR_XRGB(0, 128, 128));
-	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(255, 255, 255));
+	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(0, 128, 128));
 	textures->Add(ID_TEX_FIRE, L"textures\\Fireholding.png", D3DCOLOR_XRGB(34, 177, 76));
+	textures->Add(ID_TEX_MAP_ITEMS, L"textures\\MapItems.png", D3DCOLOR_XRGB(34, 177, 76));
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
 	
-//	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
 	LPDIRECT3DTEXTURE9 texSimon = textures->Get(ID_TEX_SIMON);
 	LPDIRECT3DTEXTURE9 texWhip = textures->Get(ID_TEX_WHIP);
 	LPDIRECT3DTEXTURE9 texMap = textures->Get(ID_TEX_MAP);
 	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
+	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
 
 	ifstream infile("text\\Sprites.txt");
 	int arr[6];
@@ -168,9 +181,9 @@ void LoadResources()
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMap);
 		else if (arr[5] == 3)
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texFire);
-
+		else if (arr[5] == 4)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMapItems);
 	}
-	
 	
 
 
@@ -284,7 +297,7 @@ void LoadResources()
 	animations->Add(599, ani);
 
 	ani = new CAnimation(100);		// brick
-	ani->Add(20001);
+	ani->Add(200);
 	animations->Add(601, ani);
 
 	ani = new CAnimation(300);		// Goomba walk
@@ -352,10 +365,10 @@ void LoadResources()
 	whip->AddAnimation(602);
 	objects.push_back(whip);
 
-	for (int i = 1; i <= 2; i++) {
+	for (int i = 1; i <= 3; i++) {
 		fire = new FireHolding();
 		fire->AddAnimation(700);
-		fire->SetPosition(200*i + 16.0f, 130);
+		fire->SetPosition(150*i + 16.0f, 130);
 		objects.push_back(fire);
 	}
 	
