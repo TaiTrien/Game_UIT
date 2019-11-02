@@ -1,6 +1,5 @@
 #pragma once
 #include "GameObject.h"
-
 #define SIMON_WALKING_SPEED		0.1f 
 //0.1f
 #define SIMON_JUMP_SPEED_Y		0.5f
@@ -14,6 +13,7 @@
 #define SIMON_STATE_DIE				400
 #define SIMON_STATE_ATTACK			500
 #define SIMON_STATE_SITTING			600
+#define SIMON_STATE_STAND_UP		700
 
 #define SIMON_ANI_BIG_IDLE_RIGHT		0
 #define SIMON_ANI_BIG_IDLE_LEFT			1
@@ -44,10 +44,11 @@
 #define SIMON_SMALL_BBOX_WIDTH  13
 #define SIMON_SMALL_BBOX_HEIGHT 15
 
+#define SIMON_ATTACK_MAX_FRAME	3
 #define SIMON_UNTOUCHABLE_TIME 5000
 
 
-class CSimon : public CGameObject
+class Simon : public CGameObject
 {
 	int level;
 	int untouchable;
@@ -56,7 +57,7 @@ class CSimon : public CGameObject
 	bool isSitting;
 	DWORD untouchable_start;
 public: 
-	CSimon() : CGameObject()
+	Simon() : CGameObject()
 	{
 		level = SIMON_LEVEL_BIG;
 		untouchable = 0;
@@ -64,8 +65,10 @@ public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
 	void SetState(int state);
-	void SetLevel(int l) { level = l; }
+	void SetLevel(int l) {level = l;}
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
-
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
+	bool getIsAttacking();
+	bool getIsJumping();
+	bool getIsSitting();
 };

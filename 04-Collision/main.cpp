@@ -26,17 +26,19 @@
 #include "Game.h"
 #include "GameObject.h"
 #include "Textures.h"
-
+#include "PlayScene.h"
 #include "Simon.h"
+#include "Whip.h"
+#include "FireHolding.h"
 #include "Brick.h"
 #include "Goomba.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"04 - Collision"
 
-#define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
+#define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
+#define SCREEN_WIDTH 300
+#define SCREEN_HEIGHT 220
 
 #define MAX_FRAME_RATE 120
 
@@ -44,10 +46,16 @@
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 #define ID_TEX_SIMON 30
+#define ID_TEX_WHIP 40
+#define ID_TEX_MAP 50
+#define ID_TEX_FIRE 60
+#define ID_TEX_MAP_ITEMS 70
 
 CGame *game;
-
-CSimon *simon;
+Whip *whip;
+Simon *simon;
+PlayScene *playScene;
+FireHolding *fire;
 //CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
@@ -67,10 +75,22 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
+		if (simon->getIsSitting()) return;
 		simon->SetState(SIMON_STATE_JUMP);
 		break;
 	case DIK_A:
 		simon->SetState(SIMON_STATE_ATTACK);
+		whip->SetState(WHIP_STATE_ATTACK);
+		break;
+	case DIK_LEFT:
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->nx = -1;
+		break;
+	case DIK_RIGHT:
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->nx = 1;
 		break;
 	}
 
@@ -79,18 +99,30 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 void CSampleKeyHander::OnKeyUp(int KeyCode)
 {
 	DebugOut(L"[INFO] KeyUp: %d\n", KeyCode);
+	switch (KeyCode)
+	{
+	case DIK_DOWN:
+		simon->SetState(SIMON_STATE_STAND_UP);
+		break;
+	}
 }
 
 void CSampleKeyHander::KeyState(BYTE *states)
 {
 	// disable control key when Mario die 
 	if (simon->GetState() == SIMON_STATE_DIE) return;
-	if (game->IsKeyDown(DIK_RIGHT))
-		simon->SetState(SIMON_STATE_WALKING_RIGHT);
-	else if (game->IsKeyDown(DIK_LEFT))
-		simon->SetState(SIMON_STATE_WALKING_LEFT);
-	else if (game->IsKeyDown(DIK_DOWN))
+	if (game->IsKeyDown(DIK_DOWN))
 		simon->SetState(SIMON_STATE_SITTING);
+	else if (game->IsKeyDown(DIK_RIGHT)) {
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->SetState(SIMON_STATE_WALKING_RIGHT);
+	}
+	else if (game->IsKeyDown(DIK_LEFT)) {
+		if (simon->getIsAttacking()) return;
+		if (simon->getIsJumping()) return;
+		simon->SetState(SIMON_STATE_WALKING_LEFT);
+	}
 	else
 		simon->SetState(SIMON_STATE_IDLE);
 }
@@ -119,200 +151,116 @@ void LoadResources()
 	CTextures * textures = CTextures::GetInstance();
 
 	textures->Add(ID_TEX_MARIO, L"textures\\simon.png",D3DCOLOR_XRGB(255, 255, 255));
-	textures->Add(ID_TEX_MISC, L"textures\\misc.png", D3DCOLOR_XRGB(176, 224, 248));
-	textures->Add(ID_TEX_ENEMY, L"textures\\enemies.png", D3DCOLOR_XRGB(3, 26, 110));
-
-
 	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
-
 	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
-
-
+	textures->Add(ID_TEX_WHIP, L"textures\\whip.png", D3DCOLOR_XRGB(0, 128, 128));
+	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(0, 128, 128));
+	textures->Add(ID_TEX_FIRE, L"textures\\Fireholding.png", D3DCOLOR_XRGB(34, 177, 76));
+	textures->Add(ID_TEX_MAP_ITEMS, L"textures\\MapItems.png", D3DCOLOR_XRGB(34, 177, 76));
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
 	
-//	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_MARIO);
-	LPDIRECT3DTEXTURE9 texMario = textures->Get(ID_TEX_SIMON);
+	
+	LPDIRECT3DTEXTURE9 texSimon = textures->Get(ID_TEX_SIMON);
+	LPDIRECT3DTEXTURE9 texWhip = textures->Get(ID_TEX_WHIP);
+	LPDIRECT3DTEXTURE9 texMap = textures->Get(ID_TEX_MAP);
+	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
+	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
 
-	ifstream infile("Simon.txt");
-	int arr[5];
+	ifstream infile("text\\Sprites.txt"); // load all sprite
+	int arr[6];
 	while (infile)
 	{
-		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4];
-		sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMario);
+		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4] >> arr[5];
+		if (arr[5] == 0)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texSimon);
+		else if (arr[5] == 1)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texWhip);
+		else if (arr[5] == 2)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMap);
+		else if (arr[5] == 3)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texFire);
+		else if (arr[5] == 4)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMapItems);
 	}
-	// big
-	//sprites->Add(10001, 246, 154, 260, 181, texMario);		// idle right
-
-	//sprites->Add(10002, 275, 154, 290, 181, texMario);		// walk
-	//sprites->Add(10003, 304, 154, 321, 181, texMario);
-
-	//sprites->Add(10011, 186, 154, 200, 181, texMario);		// idle left
-	//sprites->Add(10012, 155, 154, 170, 181, texMario);		// walk
-	//sprites->Add(10013, 125, 154, 140, 181, texMario);
-
-	//sprites->Add(10099, 215, 120, 231, 135, texMario);		// die 
-
-	// small
-	sprites->Add(10021, 247, 0, 259, 15, texMario);			// idle small right
-	sprites->Add(10022, 275, 0, 291, 15, texMario);			// walk 
-	sprites->Add(10023, 306, 0, 320, 15, texMario);			// 
-
-	sprites->Add(10031, 187, 0, 198, 15, texMario);			// idle small left
-
-	sprites->Add(10032, 155, 0, 170, 15, texMario);			// walk
-	sprites->Add(10033, 125, 0, 139, 15, texMario);			// 
-
-
-	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
-	sprites->Add(20001, 408, 225, 424, 241, texMisc);
-
-	LPDIRECT3DTEXTURE9 texEnemy = textures->Get(ID_TEX_ENEMY);
-	sprites->Add(30001, 5, 14, 21, 29, texEnemy);
-	sprites->Add(30002, 25, 14, 41, 29, texEnemy);
-
-	sprites->Add(30003, 45, 21, 61, 29, texEnemy); // die sprite
-
+	
+	ifstream infileAni("text\\Animations.txt"); // load all animations
 	LPANIMATION ani;
+	int arr1[5];
+	while (infileAni)
+	{
+		infileAni >> arr1[0] >> arr1[1] >> arr1[2] >> arr1[3] >> arr1[4];
+		ani = new CAnimation(100);
+		ani->Add(arr1[1]);
+		for (int i = 2; i <= 4; i++) {
+			if (arr1[i] != 0) {
+				ani->Add(arr1[i]);
+			}
+		}
+		animations->Add(arr1[0], ani);
+	}
 
-	ani = new CAnimation(100);	// idle big right
-	ani->Add(10001);
-	animations->Add(400, ani);
-
-	ani = new CAnimation(100);	// idle big left
-	ani->Add(10004);
-	animations->Add(401, ani);
-
-	ani = new CAnimation(100);	// idle small right
-	ani->Add(10021);
-	animations->Add(402, ani);
-
-	ani = new CAnimation(100);	// idle small left
-	ani->Add(10031);
-	animations->Add(403, ani);
-
-	ani = new CAnimation(100);	// walk right big
-	ani->Add(10001);
-	ani->Add(10002);
-	ani->Add(10003);
-	animations->Add(500, ani);
-
-	ani = new CAnimation(100);	// // walk left big
-	ani->Add(10004);
-	ani->Add(10005);
-	ani->Add(10006);
-	animations->Add(501, ani);
-
-	ani = new CAnimation(100);	// walk right small
-	ani->Add(10021);
-	ani->Add(10022);
-	ani->Add(10023);
-	animations->Add(502, ani);
-
-	ani = new CAnimation(100);	// walk left small
-	ani->Add(10031);
-	ani->Add(10032);
-	ani->Add(10033);
-	animations->Add(503, ani);
-
-	ani = new CAnimation(100); // fighting right 
-	ani->Add(10010);
-	ani->Add(10011);
-	ani->Add(10012);
-	ani->Add(10001);
-	animations->Add(504, ani);
-
-	ani = new CAnimation(100); // fighting left 
-	ani->Add(10013);
-	ani->Add(10014);
-	ani->Add(10015);
-	ani->Add(10004);
-	animations->Add(505, ani);
-
+	
+	for (int i = 0; i <= 23; i++) {  // for map
+		ani = new CAnimation(100);
+		ani->Add(i);
+		animations->Add(i, ani);
+	}
 	ani = new CAnimation(100);
-	ani->Add(1030);
-	animations->Add(506, ani); // jumping right
+	for (int i = 0; i <= 1; i++) {  // for fire holding
+		ani->Add(i + 100);
+		animations->Add(700, ani);
+	}
 
-	ani = new CAnimation(100); // jumping left 
-	ani->Add(1031);
-	animations->Add(507, ani);
 
-	ani = new CAnimation(100); // sit attack right 
-	ani->Add(1030);
-	ani->Add(1041);
-	ani->Add(1042);
-	ani->Add(1043);
-	animations->Add(508, ani);
+	ifstream infile2("text\\Entrance.txt"); // load entrance
+	int mArray;
+	for (int d = 0; d < 5; d++) {
+		for (int c = 0; c < 24; c++) {
+			infile2 >> mArray;
+			PlayScene *entrance = new PlayScene();
+			if (mArray!= 0)
+			{
+				entrance->AddAnimation(mArray);
+				entrance->SetPosition(0 + c * 32.0f,  d * 32.0f);
+				objects.push_back(entrance);
+			}
+		}
+	}
+	infile2.close();
 
-	ani = new CAnimation(100); // sit attack left 
-	ani->Add(1031);
-	ani->Add(1044);
-	ani->Add(1045);
-	ani->Add(1046);
-	animations->Add(509, ani);
+	
 
-	ani = new CAnimation(100);		// Mario die
-	ani->Add(10099);
-	animations->Add(599, ani);
-
-	ani = new CAnimation(100);		// brick
-	ani->Add(20001);
-	animations->Add(601, ani);
-
-	ani = new CAnimation(300);		// Goomba walk
-	ani->Add(30001);
-	ani->Add(30002);
-	animations->Add(701, ani);
-
-	ani = new CAnimation(1000);		// Goomba dead
-	ani->Add(30003);
-	animations->Add(702, ani);
-
-	simon = new CSimon();
-	simon->AddAnimation(400);		// idle right big
-	simon->AddAnimation(401);		// idle left big
-	simon->AddAnimation(402);		// idle right small
-	simon->AddAnimation(403);		// idle left small
-
-	simon->AddAnimation(500);		// walk right big
-	simon->AddAnimation(501);		// walk left big
-	simon->AddAnimation(502);		// walk right small
-	simon->AddAnimation(503);		// walk left big
-	simon->AddAnimation(504);		// attack right
-	simon->AddAnimation(505);		// attack left
-	simon->AddAnimation(506);		// jump right
-	simon->AddAnimation(507);		// jump left
-	simon->AddAnimation(508);		// sit attack right
-	simon->AddAnimation(509);		// sit attack left
-
+	simon = new Simon();
+	for (int i = 400; i <= 413; i++) {
+		simon->AddAnimation(i);
+	}
+	
 	simon->SetPosition(50.0f, 0);
 	objects.push_back(simon);
 
-	for (int i = 0; i < 5; i++)
-	{
-		CBrick *brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(100.0f + i*60.0f, 74.0f);
-		objects.push_back(brick);
+	whip = new Whip();
+	whip->CloneSimon(simon);
+	whip->AddAnimation(800);
+	whip->AddAnimation(801);
+	whip->AddAnimation(602);
+	objects.push_back(whip);
 
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(100.0f + i*60.0f, 90.0f);
-		objects.push_back(brick);
-
-		brick = new CBrick();
-		brick->AddAnimation(601);
-		brick->SetPosition(84.0f + i*60.0f, 90.0f);
-		objects.push_back(brick);
+	for (int i = 1; i <= 3; i++) {
+		fire = new FireHolding();
+		fire->AddAnimation(700);
+		fire->SetPosition(150*i + 16.0f, 130);
+		objects.push_back(fire);
 	}
+	
 
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 60; i++)
 	{
 		CBrick *brick = new CBrick();
 		brick->AddAnimation(601);
-		brick->SetPosition(0 + i*16.0f, 150);
+		brick->SetPosition(0 + i*16.0f, 160);
 		objects.push_back(brick);
 	}
 
@@ -337,7 +285,7 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-
+	//whip->CloneSimon(simon);
 	vector<LPGAMEOBJECT> coObjects;
 	for (int i = 1; i < objects.size(); i++)
 	{

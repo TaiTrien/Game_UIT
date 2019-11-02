@@ -1,18 +1,17 @@
 ﻿#include <algorithm>
 #include "debug.h"
-
 #include "Simon.h"
 #include "Game.h"
 
 #include "Goomba.h"
 
-void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
+void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
 
 	// Simple fall down
-	vy += SIMON_GRAVITY*dt;
+	vy += SIMON_GRAVITY*dt;	
 
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
@@ -29,9 +28,7 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable_start = 0;
 		untouchable = 0;
 	}
-	//if (isSitting) {
-	//	y += 0.2; //Update tọa độ cho sprite ngồi
-	//}
+	
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
 	{
@@ -57,64 +54,53 @@ void CSimon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 
 		// Collision logic with Goombas
-		for (UINT i = 0; i < coEventsResult.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
+		//for (UINT i = 0; i < coEventsResult.size(); i++)
+		//{
+		//	LPCOLLISIONEVENT e = coEventsResult[i];
 
-			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
-			{
-				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
+		//	if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
+		//	{
+		//		CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
-				// jump on top >> kill Goomba and deflect a bit 
-				if (e->ny < 0)
-				{
-					if (goomba->GetState()!= GOOMBA_STATE_DIE)
-					{
-						goomba->SetState(GOOMBA_STATE_DIE);
-						vy = -SIMON_JUMP_DEFLECT_SPEED;
-					}
-				}
-				else if (e->nx != 0)
-				{
-					if (untouchable==0)
-					{
-						if (goomba->GetState()!=GOOMBA_STATE_DIE)
-						{
-							if (level > SIMON_LEVEL_SMALL)
-							{
-								level = SIMON_LEVEL_SMALL;
-								StartUntouchable();
-							}
-							else 
-								SetState(SIMON_STATE_DIE);
-						}
-					}
-				}
-			}
-		}
+		//		// jump on top >> kill Goomba and deflect a bit 
+		//		if (e->ny < 0)
+		//		{
+		//			if (goomba->GetState()!= GOOMBA_STATE_DIE)
+		//			{
+		//				goomba->SetState(GOOMBA_STATE_DIE);
+		//				vy = -SIMON_JUMP_DEFLECT_SPEED;
+		//			}
+		//		}
+		//		else if (e->nx != 0)
+		//		{
+		//			if (untouchable==0)
+		//			{
+		//				if (goomba->GetState()!=GOOMBA_STATE_DIE)
+		//				{
+		//					SetState(SIMON_STATE_DIE);
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 	}
 
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
-void CSimon::Render()
+void Simon::Render()
 {
 	int ani;
-	int maxFrame = 0;
-	int temp = 1;
 		if (isJumping) {
-			maxFrame = 1;
 			if (nx > 0) {
 				if (isAttacking) {
-					maxFrame = 3;
 						ani = SIMON_ANI_ATTACK_RIGHT;
 				}
 				else ani = SIMON_ANI_JUMP_RIGHT;
 			}
 			else {
 				if (isAttacking) {
-					maxFrame = 3;
 					ani = SIMON_ANI_ATTACK_LEFT;
 				}
 				else ani = SIMON_ANI_JUMP_LEFT;
@@ -125,7 +111,6 @@ void CSimon::Render()
 			{
 				if (nx > 0) {
 					if (isAttacking) {
-						maxFrame = 3;
 						if (isSitting)
 						{
 							ani = SIMON_ANI_SIT_ATTACK_RIGHT;
@@ -141,7 +126,6 @@ void CSimon::Render()
 				else
 				{
 					if (isAttacking) {
-						maxFrame = 3;
 						if (isSitting) {
 							ani = SIMON_ANI_SIT_ATTACK_LEFT;
 						}
@@ -165,42 +149,39 @@ void CSimon::Render()
 	if (untouchable) alpha = 128;
 	animations[ani]->Render(x, y, alpha);
 	RenderBoundingBox();
-	if (animations[ani]->getCurrentFrame() == maxFrame) {
-		if (isAttacking)
+	if (isAttacking) {
+		if(animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME)
 			isAttacking = false;
-		if (isSitting) {
-			isSitting = false;
-		}
-		if (isJumping)
-			isJumping = false;
-		temp = 1;
 	}
 }
 
-void CSimon::SetState(int state)
+void Simon::SetState(int state)
 {
 	CGameObject::SetState(state);
-
+	
 	switch (state)
 	{
 	case SIMON_STATE_WALKING_RIGHT:
-		if (this->isJumping) {
-			break;
+		if (this->isJumping || this->isSitting) {
+			vx = 0;
+			
 		}
-		if (this->isSitting) {
-			break;
+		else if (this->isAttacking) {
+			vx = 0;
 		}
-		vx = SIMON_WALKING_SPEED;
+		else
+			vx = SIMON_WALKING_SPEED;
 		nx = 1;
 		break;
 	case SIMON_STATE_WALKING_LEFT:
-		if (this->isJumping) {
-			break;
+		if (this->isJumping || this->isSitting) {
+			vx = 0;
 		}
-		if (this->isSitting) {
-			break;
+		else if (this->isAttacking) {
+			vx = 0;
 		}
-		vx = -SIMON_WALKING_SPEED;
+		else
+			vx = -SIMON_WALKING_SPEED;
 		nx = -1;
 		break;
 	case SIMON_STATE_JUMP:
@@ -211,30 +192,51 @@ void CSimon::SetState(int state)
 		break;
 	case SIMON_STATE_IDLE:
 		vx = 0;
+		isSitting = false;
 		break;
 	case SIMON_STATE_DIE:
 		vy = -SIMON_DIE_DEFLECT_SPEED;
 		break;
 	case SIMON_STATE_ATTACK:
 		if (this->isAttacking)
-			break;
+			return;
 		this->isAttacking = true;
+		vx = 0;
 		break;
 	case SIMON_STATE_SITTING:
 		if (this->isSitting)
 			break;
 		vx = 0;
+		y += 5;
 		this->isSitting = true;
 		break;
+	case SIMON_STATE_STAND_UP:
+		y -= 5;
+		isSitting = false;
+		break;
 	}
+	
 }
 
-void CSimon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
+void Simon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
 	left = x;
 	top = y; 
-
+	
 	right = x + SIMON_BIG_BBOX_WIDTH;
 	bottom = y + SIMON_BIG_BBOX_HEIGHT;	
+	if (isSitting) {
+		bottom -= 5;
+	}
+	
+}
+bool Simon::getIsAttacking() {
+	return isAttacking;
+}
+bool Simon::getIsJumping() {
+	return isJumping;
+}
+bool Simon::getIsSitting() {
+	return isSitting;
 }
 
