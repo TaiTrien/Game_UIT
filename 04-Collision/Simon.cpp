@@ -54,35 +54,35 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 
 		// Collision logic with Goombas
-		for (UINT i = 0; i < coEventsResult.size(); i++)
-		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
+		//for (UINT i = 0; i < coEventsResult.size(); i++)
+		//{
+		//	LPCOLLISIONEVENT e = coEventsResult[i];
 
-			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
-			{
-				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
+		//	if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
+		//	{
+		//		CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
 
-				// jump on top >> kill Goomba and deflect a bit 
-				if (e->ny < 0)
-				{
-					if (goomba->GetState()!= GOOMBA_STATE_DIE)
-					{
-						goomba->SetState(GOOMBA_STATE_DIE);
-						vy = -SIMON_JUMP_DEFLECT_SPEED;
-					}
-				}
-				else if (e->nx != 0)
-				{
-					if (untouchable==0)
-					{
-						if (goomba->GetState()!=GOOMBA_STATE_DIE)
-						{
-							SetState(SIMON_STATE_DIE);
-						}
-					}
-				}
-			}
-		}
+		//		// jump on top >> kill Goomba and deflect a bit 
+		//		if (e->ny < 0)
+		//		{
+		//			if (goomba->GetState()!= GOOMBA_STATE_DIE)
+		//			{
+		//				goomba->SetState(GOOMBA_STATE_DIE);
+		//				vy = -SIMON_JUMP_DEFLECT_SPEED;
+		//			}
+		//		}
+		//		else if (e->nx != 0)
+		//		{
+		//			if (untouchable==0)
+		//			{
+		//				if (goomba->GetState()!=GOOMBA_STATE_DIE)
+		//				{
+		//					SetState(SIMON_STATE_DIE);
+		//				}
+		//			}
+		//		}
+		//	}
+		//}
 	}
 
 	// clean up collision events

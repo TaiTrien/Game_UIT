@@ -5,6 +5,8 @@
 
 void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 {
+	CGameObject::Update(dt);
+
 	
 	if (simon->nx > 0)
 	{
@@ -52,8 +54,32 @@ void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 		
 	}
 
+	// Simple fall down
 
+	vector<LPCOLLISIONEVENT> coEvents;
+	vector<LPCOLLISIONEVENT> coEventsResult;
+
+	coEvents.clear();
+
+
+	// No collision occured, proceed normally
+	if (coEvents.size() == 0)
+	{
+		x += dx;
+		y += dy;
+	}
+	else
+	{
+		float min_tx, min_ty, nx = 0, ny;
+
+		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
+
+	}
+
+	// clean up collision events
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
+
 void Whip::Render()
 {
 	int ani = WHIP_ANI_EMPTY;

@@ -168,7 +168,7 @@ void LoadResources()
 	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
 	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
 
-	ifstream infile("text\\Sprites.txt");
+	ifstream infile("text\\Sprites.txt"); // load all sprite
 	int arr[6];
 	while (infile)
 	{
@@ -185,130 +185,23 @@ void LoadResources()
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMapItems);
 	}
 	
-
-
-	LPDIRECT3DTEXTURE9 texMisc = textures->Get(ID_TEX_MISC);
-	sprites->Add(20001, 408, 225, 424, 241, texMisc);
-
-	LPDIRECT3DTEXTURE9 texEnemy = textures->Get(ID_TEX_ENEMY);
-	sprites->Add(30001, 5, 14, 21, 29, texEnemy);
-	sprites->Add(30002, 25, 14, 41, 29, texEnemy);
-
-	sprites->Add(30003, 45, 21, 61, 29, texEnemy); // die sprite
-
+	ifstream infileAni("text\\Animations.txt"); // load all animations
 	LPANIMATION ani;
+	int arr1[5];
+	while (infileAni)
+	{
+		infileAni >> arr1[0] >> arr1[1] >> arr1[2] >> arr1[3] >> arr1[4];
+		ani = new CAnimation(100);
+		ani->Add(arr1[1]);
+		for (int i = 2; i <= 4; i++) {
+			if (arr1[i] != 0) {
+				ani->Add(arr1[i]);
+			}
+		}
+		animations->Add(arr1[0], ani);
+	}
 
-	ani = new CAnimation(100);	// idle big right
-	ani->Add(10001);
-	animations->Add(400, ani);
-
-	ani = new CAnimation(100);	// idle big left
-	ani->Add(10004);
-	animations->Add(401, ani);
-
-	ani = new CAnimation(100);	// idle small right
-	ani->Add(10021);
-	animations->Add(402, ani);
-
-	ani = new CAnimation(100);	// idle small left
-	ani->Add(10031);
-	animations->Add(403, ani);
-
-	ani = new CAnimation(100);	// walk right big
-	ani->Add(10001);
-	ani->Add(10002);
-	ani->Add(10003);
-	animations->Add(500, ani);
-
-	ani = new CAnimation(100);	// // walk left big
-	ani->Add(10004);
-	ani->Add(10005);
-	ani->Add(10006);
-	animations->Add(501, ani);
-
-	ani = new CAnimation(100);	// walk right small
-	ani->Add(10021);
-	ani->Add(10022);
-	ani->Add(10023);
-	animations->Add(502, ani);
-
-	ani = new CAnimation(100);	// walk left small
-	ani->Add(10031);
-	ani->Add(10032);
-	ani->Add(10033);
-	animations->Add(503, ani);
-
-	ani = new CAnimation(100); // attack right 
-	ani->Add(10010);
-	ani->Add(10011);
-	ani->Add(10012);
-	ani->Add(10001);
-	animations->Add(504, ani);
-
-	ani = new CAnimation(100); // attack left 
-	ani->Add(10013);
-	ani->Add(10014);
-	ani->Add(10015);
-	ani->Add(10004);
-	animations->Add(505, ani);
-
-	ani = new CAnimation(100);
-	ani->Add(1030);
-	animations->Add(506, ani); // jumping right
-
-	ani = new CAnimation(100); // jumping left 
-	ani->Add(1031);
-	animations->Add(507, ani);
-
-	ani = new CAnimation(100); // sit attack right 
-	ani->Add(1041);
-	ani->Add(1042);
-	ani->Add(1043);
-	ani->Add(1030);
-	animations->Add(508, ani);
-
-	ani = new CAnimation(100); // sit attack left 
-	ani->Add(1044);
-	ani->Add(1045);
-	ani->Add(1046);
-	ani->Add(1031);
-	animations->Add(509, ani);
-
-	ani = new CAnimation(100); // whip type 1 attack right 
-	ani->Add(2001);
-	ani->Add(2002);
-	ani->Add(2003);
-	ani->Add(2060); // empty sprite
-	animations->Add(800, ani);
-
-	ani = new CAnimation(100); // whip type 1 attack left 
-	ani->Add(2004);
-	ani->Add(2005);
-	ani->Add(2006);
-	ani->Add(2060);
-	animations->Add(801, ani);
-
-	ani = new CAnimation(100);
-	ani->Add(2060);
-	animations->Add(602, ani);
-
-	ani = new CAnimation(100);		// Mario die
-	ani->Add(10099);
-	animations->Add(599, ani);
-
-	ani = new CAnimation(100);		// brick
-	ani->Add(200);
-	animations->Add(601, ani);
-
-	ani = new CAnimation(300);		// Goomba walk
-	ani->Add(30001);
-	ani->Add(30002);
-	animations->Add(701, ani);
-
-	ani = new CAnimation(1000);		// Goomba dead
-	ani->Add(30003);
-	animations->Add(702, ani);
-
+	
 	for (int i = 0; i <= 23; i++) {  // for map
 		ani = new CAnimation(100);
 		ani->Add(i);
@@ -321,7 +214,7 @@ void LoadResources()
 	}
 
 
-	ifstream infile2("text\\Entrance.txt");
+	ifstream infile2("text\\Entrance.txt"); // load entrance
 	int mArray;
 	for (int d = 0; d < 5; d++) {
 		for (int c = 0; c < 24; c++) {
@@ -340,21 +233,10 @@ void LoadResources()
 	
 
 	simon = new Simon();
-	simon->AddAnimation(400);		// idle right big
-	simon->AddAnimation(401);		// idle left big
-	simon->AddAnimation(402);		// idle right small
-	simon->AddAnimation(403);		// idle left small
-
-	simon->AddAnimation(500);		// walk right big
-	simon->AddAnimation(501);		// walk left big
-	simon->AddAnimation(502);		// walk right small
-	simon->AddAnimation(503);		// walk left big
-	simon->AddAnimation(504);		// attack right
-	simon->AddAnimation(505);		// attack left
-	simon->AddAnimation(506);		// jump right
-	simon->AddAnimation(507);		// jump left
-	simon->AddAnimation(508);		// sit attack right
-	simon->AddAnimation(509);		// sit attack left
+	for (int i = 400; i <= 413; i++) {
+		simon->AddAnimation(i);
+	}
+	
 	simon->SetPosition(50.0f, 0);
 	objects.push_back(simon);
 
