@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include"Simon.h"
+#include "FireHolding.h"
 #define  WHIP_STATE_ATTACK 100
 #define  WHIP_ANI_ATTACK_RIGHT    0
 #define  WHIP_ANI_ATTACK_LEFT     1

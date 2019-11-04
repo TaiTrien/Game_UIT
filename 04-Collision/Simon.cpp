@@ -150,8 +150,8 @@ void Simon::Render()
 	animations[ani]->Render(x, y, alpha);
 	RenderBoundingBox();
 	if (isAttacking) {
-		if(animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME)
-			isAttacking = false;
+		if (animations[ani]->getCurrentFrame() == SIMON_ATTACK_MAX_FRAME)
+		isAttacking = false;
 	}
 }
 

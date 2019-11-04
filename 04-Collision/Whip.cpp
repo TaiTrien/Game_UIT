@@ -54,30 +54,24 @@ void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 		
 	}
 
-	// Simple fall down
 
-	vector<LPCOLLISIONEVENT> coEvents;
-	vector<LPCOLLISIONEVENT> coEventsResult;
-
-	coEvents.clear();
-
-
-	// No collision occured, proceed normally
-	if (coEvents.size() == 0)
+	for (UINT i = 0; i < colliable_object->size(); i++)
 	{
-		x += dx;
-		y += dy;
+
+		if (dynamic_cast<FireHolding *>(colliable_object->at(i)))//is fire holdings
+		{
+			FireHolding * fireHolding = dynamic_cast<FireHolding *>(colliable_object->at(i));
+			float l, t, r, b; // left top right bottom of whip
+			float L, T, R, B; //left top right bottom of fireholdings
+			GetBoundingBox(l, t, r, b);
+			fireHolding->GetBoundingBox(L, T, R, B);
+			if (t < B && b > T && r > L && l < R)
+			{
+				if (fireHolding->GetState() != FIREHOLDING_STATE_ATTACKED)
+					fireHolding->SetState(FIREHOLDING_STATE_ATTACKED);
+			}
+		}
 	}
-	else
-	{
-		float min_tx, min_ty, nx = 0, ny;
-
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
-
-	}
-
-	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }
 
 void Whip::Render()
@@ -99,7 +93,7 @@ void Whip::SetState(int stat)
 {
 	if (this->isWhipAttack) return;
 	CGameObject::SetState(stat);
-	switch (state = WHIP_STATE_ATTACK)
+	switch (state)
 	{
 	case WHIP_STATE_ATTACK:
 		if (isWhipAttack) return;

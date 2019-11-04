@@ -50,6 +50,7 @@
 #define ID_TEX_MAP 50
 #define ID_TEX_FIRE 60
 #define ID_TEX_MAP_ITEMS 70
+#define ID_TEX_ITEMS 80
 
 CGame *game;
 Whip *whip;
@@ -59,6 +60,7 @@ FireHolding *fire;
 //CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
+vector<LPGAMEOBJECT> objectsNotSimon; //including anything different from Simon such as Fire holding and whip to they can collision
 
 class CSampleKeyHander: public CKeyEventHandler
 {
@@ -157,6 +159,7 @@ void LoadResources()
 	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(0, 128, 128));
 	textures->Add(ID_TEX_FIRE, L"textures\\Fireholding.png", D3DCOLOR_XRGB(34, 177, 76));
 	textures->Add(ID_TEX_MAP_ITEMS, L"textures\\MapItems.png", D3DCOLOR_XRGB(34, 177, 76));
+	textures->Add(ID_TEX_ITEMS, L"textures\\Items.png", D3DCOLOR_XRGB(255, 0, 255));
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
@@ -167,6 +170,7 @@ void LoadResources()
 	LPDIRECT3DTEXTURE9 texMap = textures->Get(ID_TEX_MAP);
 	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
 	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
+	LPDIRECT3DTEXTURE9 texItems = textures->Get(ID_TEX_ITEMS);
 
 	ifstream infile("text\\Sprites.txt"); // load all sprite
 	int arr[6];
@@ -183,9 +187,11 @@ void LoadResources()
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texFire);
 		else if (arr[5] == 4)
 			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMapItems);
+		else if (arr[5] == 5)
+			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texItems);
 	}
 	
-	ifstream infileAni("text\\Animations.txt"); // load all animations
+	ifstream infileAni("text\\Animations.txt"); // load all animations except map
 	LPANIMATION ani;
 	int arr1[5];
 	while (infileAni)
@@ -201,16 +207,10 @@ void LoadResources()
 		animations->Add(arr1[0], ani);
 	}
 
-	
 	for (int i = 0; i <= 23; i++) {  // for map
 		ani = new CAnimation(100);
 		ani->Add(i);
 		animations->Add(i, ani);
-	}
-	ani = new CAnimation(100);
-	for (int i = 0; i <= 1; i++) {  // for fire holding
-		ani->Add(i + 100);
-		animations->Add(700, ani);
 	}
 
 
@@ -245,16 +245,16 @@ void LoadResources()
 	whip->AddAnimation(800);
 	whip->AddAnimation(801);
 	whip->AddAnimation(602);
-	objects.push_back(whip);
+	objectsNotSimon.push_back(whip);
 
-	for (int i = 1; i <= 3; i++) {
+	for (int i = 1; i <= 3; i++) { // to create 3 fire holding
 		fire = new FireHolding();
-		fire->AddAnimation(700);
+		fire->AddAnimation(900);
+		fire->AddAnimation(1000); // for heart ani
 		fire->SetPosition(150*i + 16.0f, 130);
-		objects.push_back(fire);
+		objectsNotSimon.push_back(fire);
 	}
 	
-
 
 	for (int i = 0; i < 60; i++)
 	{
@@ -285,8 +285,9 @@ void Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
-	//whip->CloneSimon(simon);
+
 	vector<LPGAMEOBJECT> coObjects;
+	vector<LPGAMEOBJECT> coObjectsNotSimon;
 	for (int i = 1; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
@@ -295,6 +296,16 @@ void Update(DWORD dt)
 	for (int i = 0; i < objects.size(); i++)
 	{
 		objects[i]->Update(dt,&coObjects);
+	}
+
+	for (int i = 1; i < objectsNotSimon.size(); i++)
+	{
+		coObjectsNotSimon.push_back(objectsNotSimon[i]);
+	}
+
+	for (int i = 0; i < objectsNotSimon.size(); i++)
+	{
+		objectsNotSimon[i]->Update(dt, &coObjectsNotSimon);
 	}
 
 
@@ -326,6 +337,9 @@ void Render()
 
 		for (int i = 0; i < objects.size(); i++)
 			objects[i]->Render();
+
+		for (int i = 0; i < objectsNotSimon.size(); i++)
+			objectsNotSimon[i]->Render();
 
 		spriteHandler->End();
 		d3ddv->EndScene();
