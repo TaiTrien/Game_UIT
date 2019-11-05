@@ -34,6 +34,7 @@ class CGameObject
 {
 public:
 
+	bool isVanish;
 	float x; 
 	float y;
 

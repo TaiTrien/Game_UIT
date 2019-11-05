@@ -60,7 +60,6 @@ FireHolding *fire;
 //CGoomba *goomba;
 
 vector<LPGAMEOBJECT> objects;
-vector<LPGAMEOBJECT> objectsNotSimon; //including anything different from Simon such as Fire holding and whip to they can collision
 
 class CSampleKeyHander: public CKeyEventHandler
 {
@@ -245,14 +244,17 @@ void LoadResources()
 	whip->AddAnimation(800);
 	whip->AddAnimation(801);
 	whip->AddAnimation(602);
-	objectsNotSimon.push_back(whip);
+	objects.push_back(whip);
 
-	for (int i = 1; i <= 3; i++) { // to create 3 fire holding
+	for (int i = 1; i <= 5; i++) { // to create 5 fire holding
 		fire = new FireHolding();
 		fire->AddAnimation(900);
 		fire->AddAnimation(1000); // for heart ani
-		fire->SetPosition(150*i + 16.0f, 130);
-		objectsNotSimon.push_back(fire);
+		fire->AddAnimation(1001); // for upgrade item whip
+		fire->AddAnimation(1002); // for knife
+		fire->setIndexOfFireHolding(i);
+		fire->SetPosition(120*i, 130);
+		objects.push_back(fire);
 	}
 	
 
@@ -287,27 +289,16 @@ void Update(DWORD dt)
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
-	vector<LPGAMEOBJECT> coObjectsNotSimon;
 	for (int i = 1; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
 	}
-
 	for (int i = 0; i < objects.size(); i++)
 	{
-		objects[i]->Update(dt,&coObjects);
+		if (objects[i]->isVanish)
+			objects.erase(objects.begin() + i);
+		objects[i]->Update(dt, &coObjects);
 	}
-
-	for (int i = 1; i < objectsNotSimon.size(); i++)
-	{
-		coObjectsNotSimon.push_back(objectsNotSimon[i]);
-	}
-
-	for (int i = 0; i < objectsNotSimon.size(); i++)
-	{
-		objectsNotSimon[i]->Update(dt, &coObjectsNotSimon);
-	}
-
 
 	// Update camera to follow simon
 	float cx, cy;
@@ -338,8 +329,6 @@ void Render()
 		for (int i = 0; i < objects.size(); i++)
 			objects[i]->Render();
 
-		for (int i = 0; i < objectsNotSimon.size(); i++)
-			objectsNotSimon[i]->Render();
 
 		spriteHandler->End();
 		d3ddv->EndScene();

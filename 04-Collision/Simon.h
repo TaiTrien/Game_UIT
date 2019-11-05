@@ -14,6 +14,7 @@
 #define SIMON_STATE_ATTACK			500
 #define SIMON_STATE_SITTING			600
 #define SIMON_STATE_STAND_UP		700
+#define SIMON_STATE_EATING_ITEM     800
 
 #define SIMON_ANI_BIG_IDLE_RIGHT		0
 #define SIMON_ANI_BIG_IDLE_LEFT			1
@@ -62,7 +63,7 @@ public:
 		level = SIMON_LEVEL_BIG;
 		untouchable = 0;
 	}
-	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
+	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects);
 	virtual void Render();
 	void SetState(int state);
 	void SetLevel(int l) {level = l;}

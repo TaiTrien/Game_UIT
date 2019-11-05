@@ -1,6 +1,8 @@
+#sprite
 0 là của simon 
 1 là của roi
 2 là của map 
 3 là của chảo lửa
 4 là của item map
 5 là item của simon
+#animations

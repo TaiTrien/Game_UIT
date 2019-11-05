@@ -2,8 +2,9 @@
 #include "debug.h"
 #include "Simon.h"
 #include "Game.h"
-
+#include "FireHolding.h"
 #include "Goomba.h"
+#include "Brick.h"
 
 void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
@@ -41,53 +42,63 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny);
 
-		// block 
-		x += min_tx*dx + nx*0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
-		y += min_ty*dy + ny*0.4f;
-		
-		if (nx!=0) vx = 0;
-		if (ny != 0)
+
+		//Collision logic with items
+		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
-			vy = 0;
-			isJumping = false;
+
+			LPCOLLISIONEVENT e = coEventsResult[i]; 
+			if (dynamic_cast<CBrick *>(e->obj)) // if e->obj is brick 
+			{
+				x += min_tx * dx + nx * 0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
+				y += min_ty * dy + ny * 0.4f;
+				if (nx != 0) vx = 0;
+				if (ny != 0) {
+					vy = 0;
+					isJumping = false;
+				}
+			}
+
+			if (!dynamic_cast<CBrick *>(e->obj)) {
+				x += dx;
+				if (isJumping)
+				y += dy;
+			}
+
+			if (dynamic_cast<FireHolding *>(e->obj)) // if e->obj is fire holdings 
+			{
+				FireHolding *fireHolding = dynamic_cast<FireHolding *>(e->obj);
+				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED) {
+					fireHolding->isVanish = true;
+				}
+			}
 		}
+	}
+	
+	for (UINT i = 0; i < coObjects->size(); i++)
+	{
 
+		if (dynamic_cast<FireHolding *>(coObjects->at(i)))//is fire holdings
+		{
+			FireHolding * fireHolding = dynamic_cast<FireHolding *>(coObjects->at(i));
+			float l, t, r, b; // left top right bottom of whip
+			float L, T, R, B; //left top right bottom of fireholdings
+			GetBoundingBox(l, t, r, b);
+			fireHolding->GetBoundingBox(L, T, R, B);
+			if (t < B && b > T && r > L && l < R)
+			{
+				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED)
+					fireHolding->isVanish = true;
+			}
+		}
+	}
+	
+	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 
-		// Collision logic with Goombas
-		//for (UINT i = 0; i < coEventsResult.size(); i++)
-		//{
-		//	LPCOLLISIONEVENT e = coEventsResult[i];
-
-		//	if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
-		//	{
-		//		CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
-
-		//		// jump on top >> kill Goomba and deflect a bit 
-		//		if (e->ny < 0)
-		//		{
-		//			if (goomba->GetState()!= GOOMBA_STATE_DIE)
-		//			{
-		//				goomba->SetState(GOOMBA_STATE_DIE);
-		//				vy = -SIMON_JUMP_DEFLECT_SPEED;
-		//			}
-		//		}
-		//		else if (e->nx != 0)
-		//		{
-		//			if (untouchable==0)
-		//			{
-		//				if (goomba->GetState()!=GOOMBA_STATE_DIE)
-		//				{
-		//					SetState(SIMON_STATE_DIE);
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
 	}
 
 	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-}
+
 
 void Simon::Render()
 {
@@ -131,7 +142,6 @@ void Simon::Render()
 						}
 						else
 							ani = SIMON_ANI_ATTACK_LEFT;
-						//else ani = SIMON_ANI_ATTACK_LEFT;
 					}
 					else if (isSitting) {
 						ani = SIMON_ANI_JUMP_LEFT; // VÌ SPRITE JUMP GIỐNG SPRITE NGỒI
@@ -214,7 +224,11 @@ void Simon::SetState(int state)
 		y -= 5;
 		isSitting = false;
 		break;
+	case SIMON_STATE_EATING_ITEM:
+		vx = 0;
+		break;
 	}
+	
 	
 }
 
