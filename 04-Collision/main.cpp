@@ -80,8 +80,8 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 		simon->SetState(SIMON_STATE_JUMP);
 		break;
 	case DIK_A:
+		simon->whip->SetState(WHIP_STATE_ATTACK);
 		simon->SetState(SIMON_STATE_ATTACK);
-		whip->SetState(WHIP_STATE_ATTACK);
 		break;
 	case DIK_LEFT:
 		if (simon->getIsAttacking()) return;
@@ -239,12 +239,17 @@ void LoadResources()
 	simon->SetPosition(50.0f, 0);
 	objects.push_back(simon);
 
-	whip = new Whip();
-	whip->CloneSimon(simon);
-	whip->AddAnimation(800);
-	whip->AddAnimation(801);
-	whip->AddAnimation(602);
-	objects.push_back(whip);
+	simon->whip = new Whip();
+	simon->whip->CloneSimon(simon);
+	for (int i = 800; i <= 805; i++) {
+		simon->whip->AddAnimation(i);
+	}
+	simon->whip->AddAnimation(602);
+	objects.push_back(simon->whip);
+		
+	
+
+	
 
 	for (int i = 1; i <= 5; i++) { // to create 5 fire holding
 		fire = new FireHolding();
@@ -295,8 +300,9 @@ void Update(DWORD dt)
 	}
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->isVanish)
+		if (objects[i]->isVanish) {
 			objects.erase(objects.begin() + i);
+		}
 		objects[i]->Update(dt, &coObjects);
 	}
 

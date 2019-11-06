@@ -38,4 +38,5 @@ public:
 	void SetState(int stat);
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
 	void setIndexOfFireHolding(int x) { this->index = x; };
+	int getIndex() { return index; }
 };

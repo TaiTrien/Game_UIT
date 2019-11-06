@@ -5,6 +5,7 @@
 #include "FireHolding.h"
 #include "Goomba.h"
 #include "Brick.h"
+#include "Whip.h"
 
 void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
@@ -69,10 +70,16 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				FireHolding *fireHolding = dynamic_cast<FireHolding *>(e->obj);
 				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED) {
-					fireHolding->isVanish = true;
+					if (fireHolding->getIndex() == 2 || fireHolding->getIndex() == 4) {
+						this->whip->levelUpWhip();
+					}
+						this->SetState(SIMON_STATE_EATING_ITEM);
+						fireHolding->isVanish = true;
 				}
 			}
+			return;
 		}
+		
 	}
 	
 	for (UINT i = 0; i < coObjects->size(); i++)
@@ -81,14 +88,21 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		if (dynamic_cast<FireHolding *>(coObjects->at(i)))//is fire holdings
 		{
 			FireHolding * fireHolding = dynamic_cast<FireHolding *>(coObjects->at(i));
-			float l, t, r, b; // left top right bottom of whip
+			Whip *whip = dynamic_cast<Whip *>(coObjects->at(i));
+			float l, t, r, b; // left top right bottom of simon
 			float L, T, R, B; //left top right bottom of fireholdings
 			GetBoundingBox(l, t, r, b);
 			fireHolding->GetBoundingBox(L, T, R, B);
 			if (t < B && b > T && r > L && l < R)
 			{
-				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED)
+				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED || this->GetState() == SIMON_STATE_ATTACK) {
+					if (fireHolding->getIndex() == 2 || fireHolding->getIndex() == 4) {
+						this->whip->levelUpWhip();
+					}
+					this->SetState(SIMON_STATE_EATING_ITEM);
 					fireHolding->isVanish = true;
+				}
+					
 			}
 		}
 	}

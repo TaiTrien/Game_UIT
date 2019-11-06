@@ -1,5 +1,7 @@
 #pragma once
 #include "GameObject.h"
+#include "Whip.h"
+class Whip;
 #define SIMON_WALKING_SPEED		0.1f 
 //0.1f
 #define SIMON_JUMP_SPEED_Y		0.5f
@@ -58,6 +60,7 @@ class Simon : public CGameObject
 	bool isSitting;
 	DWORD untouchable_start;
 public: 
+	Whip * whip;
 	Simon() : CGameObject()
 	{
 		level = SIMON_LEVEL_BIG;
@@ -72,4 +75,5 @@ public:
 	bool getIsAttacking();
 	bool getIsJumping();
 	bool getIsSitting();
+	void cloneWhip(Whip *WHIP) { whip = WHIP; }
 };
