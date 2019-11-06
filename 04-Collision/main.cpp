@@ -29,6 +29,7 @@
 #include "PlayScene.h"
 #include "Simon.h"
 #include "Whip.h"
+#include "Dagger.h"
 #include "FireHolding.h"
 #include "Brick.h"
 #include "Goomba.h"
@@ -37,7 +38,7 @@
 #define MAIN_WINDOW_TITLE L"04 - Collision"
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(0, 0, 0)
-#define SCREEN_WIDTH 300
+#define SCREEN_WIDTH 260
 #define SCREEN_HEIGHT 220
 
 #define MAX_FRAME_RATE 120
@@ -53,7 +54,6 @@
 #define ID_TEX_ITEMS 80
 
 CGame *game;
-Whip *whip;
 Simon *simon;
 PlayScene *playScene;
 FireHolding *fire;
@@ -82,6 +82,13 @@ void CSampleKeyHander::OnKeyDown(int KeyCode)
 	case DIK_A:
 		simon->whip->SetState(WHIP_STATE_ATTACK);
 		simon->SetState(SIMON_STATE_ATTACK);
+		break;
+	case DIK_S: // to use subweapons
+		simon->SetState(SIMON_STATE_ATTACK); // like STATE THROWING LIKE STATE ATTACK
+		if (simon->getIsUsingSubWeapons()) {
+			simon->usingSubWeapons();
+			objects.push_back(simon->dagger);
+		}
 		break;
 	case DIK_LEFT:
 		if (simon->getIsAttacking()) return;
@@ -246,10 +253,11 @@ void LoadResources()
 	}
 	simon->whip->AddAnimation(602);
 	objects.push_back(simon->whip);
+	
+	
 		
 	
 
-	
 
 	for (int i = 1; i <= 5; i++) { // to create 5 fire holding
 		fire = new FireHolding();

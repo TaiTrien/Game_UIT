@@ -73,6 +73,9 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (fireHolding->getIndex() == 2 || fireHolding->getIndex() == 4) {
 						this->whip->levelUpWhip();
 					}
+					if (fireHolding->getIndex() == 5) {
+						numberOfDagger+=3;
+					}
 						this->SetState(SIMON_STATE_EATING_ITEM);
 						fireHolding->isVanish = true;
 				}
@@ -98,6 +101,9 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				if (fireHolding->GetState() == FIREHOLDING_STATE_ATTACKED || this->GetState() == SIMON_STATE_ATTACK) {
 					if (fireHolding->getIndex() == 2 || fireHolding->getIndex() == 4) {
 						this->whip->levelUpWhip();
+					}
+					if (fireHolding->getIndex() == 5) {
+						numberOfDagger += 3;
 					}
 					this->SetState(SIMON_STATE_EATING_ITEM);
 					fireHolding->isVanish = true;
@@ -258,6 +264,15 @@ void Simon::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 	}
 	
 }
+void Simon::usingSubWeapons() {
+	if (isUsingSubWeapons) {
+		dagger = new Dagger();
+		dagger->SetPosition(this->x, this->y);
+		dagger->SetState(DAGGER_STATE_ATTACK);
+		dagger->nx = this->nx;
+	}
+}
+
 bool Simon::getIsAttacking() {
 	return isAttacking;
 }
@@ -266,5 +281,13 @@ bool Simon::getIsJumping() {
 }
 bool Simon::getIsSitting() {
 	return isSitting;
+}
+bool Simon::getIsUsingSubWeapons() {
+	if (numberOfDagger > 0) {
+		numberOfDagger--;
+		isUsingSubWeapons = true;
+	}
+	else isUsingSubWeapons = false;
+	return isUsingSubWeapons;
 }
 

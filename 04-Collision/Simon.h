@@ -1,7 +1,9 @@
 #pragma once
 #include "GameObject.h"
 #include "Whip.h"
+#include "Dagger.h"
 class Whip;
+class Dagger;
 #define SIMON_WALKING_SPEED		0.1f 
 //0.1f
 #define SIMON_JUMP_SPEED_Y		0.5f
@@ -58,9 +60,12 @@ class Simon : public CGameObject
 	bool isAttacking;
 	bool isJumping;
 	bool isSitting;
+	bool isUsingSubWeapons;
 	DWORD untouchable_start;
 public: 
+	int numberOfDagger = 10;
 	Whip * whip;
+	Dagger *dagger;
 	Simon() : CGameObject()
 	{
 		level = SIMON_LEVEL_BIG;
@@ -72,8 +77,10 @@ public:
 	void SetLevel(int l) {level = l;}
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom);
+	void usingSubWeapons();
 	bool getIsAttacking();
 	bool getIsJumping();
 	bool getIsSitting();
+	bool getIsUsingSubWeapons();
 	void cloneWhip(Whip *WHIP) { whip = WHIP; }
 };
