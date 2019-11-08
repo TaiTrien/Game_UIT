@@ -43,11 +43,11 @@ void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 		}
 		else if (animations[aniNow]->getCurrentFrame() == 2)
 		{
-			this->x = simon->x - 18.5f;
+			this->x = simon->x - 23.0f;
 			this->y = simon->y + 5.5f;
 		}
 		else {
-			this->x = simon->x + 19.5f;
+			this->x = simon->x + 7.2f;
 			this->y = simon->y + 5.0f;
 		}
 		
@@ -66,8 +66,10 @@ void Whip::Update(DWORD time, vector<LPGAMEOBJECT>*colliable_object)
 			fireHolding->GetBoundingBox(L, T, R, B);
 			if (t < B && b > T && r > L && l < R)
 			{
-				if (fireHolding->GetState() != FIREHOLDING_STATE_ATTACKED)
+				if (fireHolding->GetState() != FIREHOLDING_STATE_ATTACKED) {
 					fireHolding->SetState(FIREHOLDING_STATE_ATTACKED);
+
+				}
 			}
 		}
 	}

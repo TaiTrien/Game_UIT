@@ -5,7 +5,6 @@
 class Whip;
 class Dagger;
 #define SIMON_WALKING_SPEED		0.1f 
-//0.1f
 #define SIMON_JUMP_SPEED_Y		0.5f
 #define SIMON_JUMP_DEFLECT_SPEED 0.2f
 #define SIMON_GRAVITY			0.002f
@@ -63,13 +62,17 @@ class Simon : public CGameObject
 	bool isUsingSubWeapons;
 	DWORD untouchable_start;
 public: 
+
 	int numberOfDagger = 10;
 	Whip * whip;
 	Dagger *dagger;
 	Simon() : CGameObject()
 	{
-		level = SIMON_LEVEL_BIG;
 		untouchable = 0;
+		for (int i = 400; i <= 413; i++) {
+			this->AddAnimation(i);
+		}
+		this->SetPosition(50.0f, 0);
 	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects);
 	virtual void Render();

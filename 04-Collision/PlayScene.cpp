@@ -1,6 +1,5 @@
 #include "PlayScene.h"
 
-PlayScene::PlayScene() {}
 void PlayScene::Render() {
 	animations[0]->Render(x, y);
 }

@@ -1,0 +1,6 @@
+﻿  Simon.cpp
+e:\study\castlevania\game_uit\04-collision\dagger.h(13): warning C4005: 'WHIP_BBOX_WIDTH': macro redefinition
+  e:\study\castlevania\game_uit\04-collision\whip.h(19): note: see previous definition of 'WHIP_BBOX_WIDTH'
+e:\study\castlevania\game_uit\04-collision\dagger.h(14): warning C4005: 'WHIP_BBOX_HEIGHT': macro redefinition
+  e:\study\castlevania\game_uit\04-collision\whip.h(20): note: see previous definition of 'WHIP_BBOX_HEIGHT'
+  04-Collision.vcxproj -> E:\Study\CastleVania\Game_UIT\04-Collision\Debug\04-Collision.exe

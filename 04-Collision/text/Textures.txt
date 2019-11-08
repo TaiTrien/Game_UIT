@@ -1,0 +1,8 @@
+-100 textures\\bbox.png 255 255 255
+30 textures\\simon.png 0 128 128
+40 textures\\whip.png 0 128 128
+50 textures\\Map_entrance.png 0 0 0
+60 textures\\Fireholding.png 34 177 76
+70 textures\\ground.png 34 177 76
+80 textures\\Items.png 255 0 255
+90 textures\\MapItems.png 255 0 255

@@ -26,6 +26,12 @@ class Whip :public CGameObject
 	int levelWhip = 1;
 	int aniNow; // to know index of animations
 public:
+	Whip() {
+		for (int i = 800; i <= 805; i++) {
+			this->AddAnimation(i);
+		}
+		this->AddAnimation(602);
+	}
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
 	void SetState(int stat);

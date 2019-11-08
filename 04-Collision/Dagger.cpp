@@ -5,8 +5,6 @@
 
 void Dagger::Update(DWORD dt, vector<LPGAMEOBJECT>*colliable_object)
 {
-
-
 	if (nx > 0)
 	{
 		vx = DAGGER_SPEED;

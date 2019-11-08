@@ -1,4 +1,4 @@
-/* =============================================================
+﻿/* =============================================================
 	INTRODUCTION TO GAME PROGRAMMING SE102
 	
 	SAMPLE 04 - COLLISION
@@ -22,6 +22,8 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 #include <fstream>
+#include <iostream>
+#include <string> 
 #include "debug.h"
 #include "Game.h"
 #include "GameObject.h"
@@ -33,7 +35,7 @@
 #include "FireHolding.h"
 #include "Brick.h"
 #include "Goomba.h"
-
+using namespace std;
 #define WINDOW_CLASS_NAME L"SampleWindow"
 #define MAIN_WINDOW_TITLE L"04 - Collision"
 
@@ -41,21 +43,28 @@
 #define SCREEN_WIDTH 260
 #define SCREEN_HEIGHT 220
 
+#define TITLE_WIDTH 32
+#define TITLE_HEIGHT 32
+
+
 #define MAX_FRAME_RATE 120
 
-#define ID_TEX_MARIO 0
+#define SPRITE_TIME 100
+
 #define ID_TEX_ENEMY 10
 #define ID_TEX_MISC 20
 #define ID_TEX_SIMON 30
 #define ID_TEX_WHIP 40
 #define ID_TEX_MAP 50
 #define ID_TEX_FIRE 60
-#define ID_TEX_MAP_ITEMS 70
+#define ID_TEX_BRICK 70
 #define ID_TEX_ITEMS 80
+#define ID_TEX_MAP_ITEMS 90
 
 CGame *game;
 Simon *simon;
 PlayScene *playScene;
+vector<vector<LPSPRITE>> map;
 FireHolding *fire;
 //CGoomba *goomba;
 
@@ -117,7 +126,6 @@ void CSampleKeyHander::OnKeyUp(int KeyCode)
 
 void CSampleKeyHander::KeyState(BYTE *states)
 {
-	// disable control key when Mario die 
 	if (simon->GetState() == SIMON_STATE_DIE) return;
 	if (game->IsKeyDown(DIK_DOWN))
 		simon->SetState(SIMON_STATE_SITTING);
@@ -148,24 +156,28 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/*
-	Load all game resources 
-	In this example: load textures, sprites, animations and simon object
+wchar_t* ConvertToWideChar(char* p) // hàm này covert string sang wchar_t*, coppy trên mạng
+{
+	wchar_t *r;
+	r = new wchar_t[strlen(p) + 1];
 
-	TO-DO: Improve this function by loading texture,sprite,animation,object from file
-*/
+	char *tempsour = p;
+	wchar_t *tempdest = r;
+	while (*tempdest++ = *tempsour++);
+
+	return r;
+}
 void LoadResources()
 {
 	CTextures * textures = CTextures::GetInstance();
 
-	textures->Add(ID_TEX_MARIO, L"textures\\simon.png",D3DCOLOR_XRGB(255, 255, 255));
-	textures->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
-	textures->Add(ID_TEX_SIMON, L"textures\\simon.png", D3DCOLOR_XRGB(0, 128, 128));
-	textures->Add(ID_TEX_WHIP, L"textures\\whip.png", D3DCOLOR_XRGB(0, 128, 128));
-	textures->Add(ID_TEX_MAP, L"textures\\Map_entrance.png", D3DCOLOR_XRGB(0, 128, 128));
-	textures->Add(ID_TEX_FIRE, L"textures\\Fireholding.png", D3DCOLOR_XRGB(34, 177, 76));
-	textures->Add(ID_TEX_MAP_ITEMS, L"textures\\MapItems.png", D3DCOLOR_XRGB(34, 177, 76));
-	textures->Add(ID_TEX_ITEMS, L"textures\\Items.png", D3DCOLOR_XRGB(255, 0, 255));
+	ifstream infileTextures("text\\Textures.txt");
+	int idTextures, R, G, B;
+	string filePath;
+	while (infileTextures) {
+		infileTextures >> idTextures >> filePath >> R >> G >> B;
+		textures->Add(idTextures, ConvertToWideChar((char*)filePath.c_str()), D3DCOLOR_XRGB(R, G, B));
+	}	
 
 	CSprites * sprites = CSprites::GetInstance();
 	CAnimations * animations = CAnimations::GetInstance();
@@ -175,106 +187,77 @@ void LoadResources()
 	LPDIRECT3DTEXTURE9 texWhip = textures->Get(ID_TEX_WHIP);
 	LPDIRECT3DTEXTURE9 texMap = textures->Get(ID_TEX_MAP);
 	LPDIRECT3DTEXTURE9 texFire = textures->Get(ID_TEX_FIRE);
-	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
+	LPDIRECT3DTEXTURE9 texBrick = textures->Get(ID_TEX_BRICK);
 	LPDIRECT3DTEXTURE9 texItems = textures->Get(ID_TEX_ITEMS);
+	LPDIRECT3DTEXTURE9 texMapItems = textures->Get(ID_TEX_MAP_ITEMS);
+	
 
-	ifstream infile("text\\Sprites.txt"); // load all sprite
-	int arr[6];
+	ifstream infile("text\\Sprites.txt"); // load all sprites
+	int arr[5], idSprite;
 	while (infile)
 	{
-		infile >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4] >> arr[5];
-		if (arr[5] == 0)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texSimon);
-		else if (arr[5] == 1)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texWhip);
-		else if (arr[5] == 2)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMap);
-		else if (arr[5] == 3)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texFire);
-		else if (arr[5] == 4)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texMapItems);
-		else if (arr[5] == 5)
-			sprites->Add(arr[0], arr[1], arr[2], arr[3], arr[4], texItems);
+		infile >> idSprite >> arr[0] >> arr[1] >> arr[2] >> arr[3] >> arr[4];
+		if (arr[4] == ID_TEX_SIMON)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texSimon);
+		else if (arr[4] == ID_TEX_WHIP)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texWhip);
+		else if (arr[4] == ID_TEX_MAP)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texMap);
+		else if (arr[4] == ID_TEX_FIRE)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texFire);
+		else if (arr[4] == ID_TEX_BRICK)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texBrick);
+		else if (arr[4] == ID_TEX_ITEMS)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texItems);
+		else if (arr[4] == ID_TEX_MAP_ITEMS)
+			sprites->Add(idSprite, arr[0], arr[1], arr[2], arr[3], texMapItems);
 	}
 	
-	ifstream infileAni("text\\Animations.txt"); // load all animations except map
+	ifstream infileAni("text\\Animations.txt"); // load all animations
 	LPANIMATION ani;
-	int arr1[5];
+	int arr1[4], idAnimation;
 	while (infileAni)
 	{
-		infileAni >> arr1[0] >> arr1[1] >> arr1[2] >> arr1[3] >> arr1[4];
-		ani = new CAnimation(100);
-		ani->Add(arr1[1]);
-		for (int i = 2; i <= 4; i++) {
-			if (arr1[i] != 0) {
+		infileAni >> idAnimation >> arr1[0] >> arr1[1] >> arr1[2] >> arr1[3];
+		ani = new CAnimation(SPRITE_TIME);
+
+		for (int i = 0; i < 4; i++) {
+			if (arr1[i] != -1) {
 				ani->Add(arr1[i]);
 			}
+			animations->Add(idAnimation, ani);
 		}
-		animations->Add(arr1[0], ani);
 	}
 
-	for (int i = 0; i <= 23; i++) {  // for map
-		ani = new CAnimation(100);
-		ani->Add(i);
-		animations->Add(i, ani);
-	}
-
+	simon = new Simon();
+	objects.push_back(simon);
 
 	ifstream infile2("text\\Entrance.txt"); // load entrance
-	int mArray;
+	int indexTitleMap; // index of title
 	for (int d = 0; d < 5; d++) {
+		vector<LPSPRITE> temp;
 		for (int c = 0; c < 24; c++) {
-			infile2 >> mArray;
-			PlayScene *entrance = new PlayScene();
-			if (mArray!= 0)
-			{
-				entrance->AddAnimation(mArray);
-				entrance->SetPosition(0 + c * 32.0f,  d * 32.0f);
-				objects.push_back(entrance);
-			}
+			infile2 >> indexTitleMap;
+			temp.push_back(sprites->Get(indexTitleMap));
 		}
+		map.push_back(temp);
 	}
 	infile2.close();
 
-	
-
-	simon = new Simon();
-	for (int i = 400; i <= 413; i++) {
-		simon->AddAnimation(i);
-	}
-	
-	simon->SetPosition(50.0f, 0);
-	objects.push_back(simon);
-
 	simon->whip = new Whip();
 	simon->whip->CloneSimon(simon);
-	for (int i = 800; i <= 805; i++) {
-		simon->whip->AddAnimation(i);
-	}
-	simon->whip->AddAnimation(602);
 	objects.push_back(simon->whip);
-	
-	
-		
-	
-
 
 	for (int i = 1; i <= 5; i++) { // to create 5 fire holding
 		fire = new FireHolding();
-		fire->AddAnimation(900);
-		fire->AddAnimation(1000); // for heart ani
-		fire->AddAnimation(1001); // for upgrade item whip
-		fire->AddAnimation(1002); // for knife
 		fire->setIndexOfFireHolding(i);
 		fire->SetPosition(120*i, 130);
 		objects.push_back(fire);
 	}
 	
-
 	for (int i = 0; i < 60; i++)
 	{
 		CBrick *brick = new CBrick();
-		brick->AddAnimation(601);
 		brick->SetPosition(0 + i*16.0f, 160);
 		objects.push_back(brick);
 	}
@@ -323,7 +306,23 @@ void Update(DWORD dt)
 
 	CGame::GetInstance()->SetCamPos(cx, 0.0f /*cy*/);
 }
+// draw map temporarily
+void DrawMap() {
+	float camX = CGame::GetInstance()->getCamX();
+	float camY = CGame::GetInstance()->getCamY();
+	int startCol = camX / TITLE_WIDTH; // column to start drawing
+	int endCol = (camX + SCREEN_WIDTH) / TITLE_WIDTH; //column to end drawing
+	float x, y; // position to draw
+	for (int i = 0; i <= 4; i++) {
+		for (int j = startCol; j <= endCol; j++) {
+			y = camY;
+			x = TITLE_WIDTH * (j - startCol) + camX - (int)camX % TITLE_WIDTH;
+			map[i][j]->Draw(x, y);
+		}
+		camY += TITLE_HEIGHT;
+	}
 
+}
 /*
 	Render a frame 
 */
@@ -339,9 +338,11 @@ void Render()
 		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
 
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
-
-		for (int i = 0; i < objects.size(); i++)
+		DrawMap();
+		for (int i = 1; i < objects.size(); i++) {
 			objects[i]->Render();
+		}
+		objects[0]->Render(); // to render simon above fire holdings
 
 
 		spriteHandler->End();

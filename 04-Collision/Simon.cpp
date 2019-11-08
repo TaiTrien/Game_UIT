@@ -63,7 +63,7 @@ void Simon::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			if (!dynamic_cast<CBrick *>(e->obj)) {
 				x += dx;
 				if (isJumping)
-				y += dy;
+					y += dy;
 			}
 
 			if (dynamic_cast<FireHolding *>(e->obj)) // if e->obj is fire holdings 
@@ -194,7 +194,6 @@ void Simon::SetState(int state)
 	case SIMON_STATE_WALKING_RIGHT:
 		if (this->isJumping || this->isSitting) {
 			vx = 0;
-			
 		}
 		else if (this->isAttacking) {
 			vx = 0;
@@ -234,6 +233,7 @@ void Simon::SetState(int state)
 		vx = 0;
 		break;
 	case SIMON_STATE_SITTING:
+		if (isAttacking) return;
 		if (this->isSitting)
 			break;
 		vx = 0;
